@@ -24,7 +24,7 @@ export default function RootLayout({
 		<html lang="en" className={`${geist.variable}`}>
 			<body>
 				<TRPCReactProvider>{children}</TRPCReactProvider>
-				<Toaster />
+				<Toaster richColors />
 			</body>
 		</html>
 	);

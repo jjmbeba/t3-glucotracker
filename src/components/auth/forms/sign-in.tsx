@@ -11,6 +11,7 @@ import { Label } from '~/components/ui/label'
 import { signInSchema } from '~/schemas/auth'
 import SocialSignIn from './social'
 import { api } from '~/trpc/react'
+import { toast } from 'sonner'
 
 type NewUser = z.infer<typeof signInSchema>
 
@@ -25,7 +26,15 @@ const SignInForm = () => {
         defaultValues: defaultUser
     })
 
-    const { mutate: signIn, isPending: isSignInPending } = api.auth.signIn.useMutation()
+    const { mutate: signIn, isPending: isSignInPending } = api.auth.signIn.useMutation({
+        onSuccess: (data) => {
+            toast.success(data.message)
+        },
+        onError: (error) => {
+            console.error(error)
+            toast.error(error.message)
+        }
+    })
 
     const form = useForm({
         ...formOpts,
@@ -34,7 +43,7 @@ const SignInForm = () => {
         },
         onSubmit: async ({ value }) => {
             signIn(value)
-        }
+        },
     })
 
     return (
