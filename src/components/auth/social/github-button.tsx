@@ -19,6 +19,8 @@ const GithubButton = () => {
                 width="1em"
                 height="1em"
                 viewBox="0 0 24 24"
+                role='img'
+                aria-label='GitHub logo'
             >
                 <path
                     fill="currentColor"

@@ -64,6 +64,8 @@ export async function SignInFallback() {
 						width="1.2em"
 						height="1.2em"
 						viewBox="0 0 24 24"
+						role='img'
+						aria-label='Sign In'
 					>
 						<path
 							fill="currentColor"
@@ -76,6 +78,8 @@ export async function SignInFallback() {
 						width="1.2em"
 						height="1.2em"
 						viewBox="0 0 24 24"
+						role='img'
+						aria-label='Dashboard'
 					>
 						<path fill="currentColor" d="M2 3h20v18H2zm18 16V7H4v12z"></path>
 					</svg>
