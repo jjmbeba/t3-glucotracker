@@ -1,48 +1,47 @@
 "use client"
 
-import { formOptions, useForm } from '@tanstack/react-form'
+import { useForm } from '@tanstack/react-form'
 import { Loader2 } from 'lucide-react'
 import Link from 'next/link'
-import { z } from 'zod'
+import { useRouter } from 'next/navigation'
 import { Button } from '~/components/ui/button'
 import { Checkbox } from '~/components/ui/checkbox'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import { signInSchema } from '~/schemas/auth'
 import SocialSignIn from './social'
-import { api } from '~/trpc/react'
+import { signIn } from '~/lib/auth-client'
 import { toast } from 'sonner'
 
-type User = z.infer<typeof signInSchema>
 
 const SignInForm = () => {
-    const defaultUser: User = {
-        email: "",
-        password: "",
-        rememberMe: false
-    }
-
-    const formOpts = formOptions({
-        defaultValues: defaultUser
-    })
-
-    const { mutate: signIn, isPending: isSignInPending } = api.auth.signIn.useMutation({
-        onSuccess: (data) => {
-            toast.success(data.message)
-        },
-        onError: (error) => {
-            console.error(error)
-            toast.error(error.message)
-        }
-    })
+    const router = useRouter()
 
     const form = useForm({
-        ...formOpts,
+        defaultValues: {
+            email: "",
+            password: "",
+            rememberMe: false
+        },
         validators: {
             onBlur: signInSchema
         },
         onSubmit: async ({ value }) => {
-            signIn(value)
+            const { email, password, rememberMe } = value
+
+            await signIn.email({
+                email,
+                password,
+                rememberMe
+            }, {
+                onError: (error) => {
+                    toast.error(error.error.message)
+                },
+                onSuccess: (data) => {
+                    toast.success("Sign in successful")
+                    router.push('/')
+                }
+            })
         },
     })
 
@@ -127,9 +126,9 @@ const SignInForm = () => {
                     <Button
                         type="submit"
                         className="w-full"
-                        disabled={!canSubmit || isSubmitting || isSignInPending}
+                        disabled={!canSubmit || isSubmitting}
                     >
-                        {isSubmitting || isSignInPending ? <Loader2 size={16} className="animate-spin" /> : "Login"}
+                        {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : "Login"}
                     </Button>
                 )}
             />

@@ -1,17 +1,19 @@
 "use client"
 import { formOptions, useForm } from "@tanstack/react-form";
 
-import type { z } from "zod";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 
 import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Label } from "~/components/ui/label";
+import { signUp, useSession } from "~/lib/auth-client";
 import { signUpSchema } from "~/schemas/auth";
 
-type NewUser = z.infer<typeof signUpSchema>
-
 const SignUpForm = () => {
+    const router = useRouter()
+
     const formOpts = formOptions({
         defaultValues: {
             firstName: "",
@@ -28,9 +30,26 @@ const SignUpForm = () => {
             onBlur: signUpSchema
         },
         onSubmit: async ({ value }) => {
-            console.log(value)
-        }
+            const { email, password, firstName, lastName } = value
+
+            await signUp.email({
+                email,
+                password,
+                name: `${firstName} ${lastName}`
+            }, {
+                onError: (error) => {
+                    toast.error(error.error.message)
+                },
+                onSuccess: (data) => {
+                    console.log(data)
+                    toast.success("Sign up successful")
+                    router.push('/')
+                }
+            })
+        },
     })
+
+    const { data } = useSession()
 
     return (
         <form onSubmit={(e) => {
@@ -39,6 +58,7 @@ const SignUpForm = () => {
 
             form.handleSubmit()
         }} className="grid gap-4">
+            {data?.user.name ?? 'Not logged in'}
             <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
                     <Label htmlFor="first-name">First name</Label>

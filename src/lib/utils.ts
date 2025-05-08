@@ -13,3 +13,7 @@ export async function convertImageToBase64(file: File): Promise<string> {
     reader.readAsDataURL(file);
   });
 }
+
+export async function generateAvatarFallback(name: string) {
+  return name.split(' ').map(n => n[0]).join('')
+}
