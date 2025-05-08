@@ -1,9 +1,6 @@
 import { Suspense } from "react";
-import { SignInButton } from "../components/auth/sign-in-button";
-import { auth } from "~/auth";
-import { headers } from "next/headers";
 import { HydrateClient } from "~/trpc/server";
-import Navbar from "~/components/common/navbar";
+import { SignInButton } from "../../components/auth/sign-in-button";
 
 export default async function Home() {
 	const features = [
@@ -18,18 +15,13 @@ export default async function Home() {
 		"Session Management",
 	];
 
-	const session = await auth.api.getSession({
-		headers: await headers()
-	})
-
 	return (
 		<HydrateClient>
-			<Navbar />
 			<div className="min-h-[80vh] flex items-center justify-center overflow-hidden no-visible-scrollbar px-6 md:px-0">
 				<main className="flex flex-col gap-4 row-start-2 items-center justify-center">
 					<div className="flex flex-col gap-1">
 						<h3 className="font-bold text-4xl text-black dark:text-white text-center">
-							Better Auth. - {session?.user.name}
+							GlucoTrack
 						</h3>
 						<p className="text-center break-words text-sm md:text-base">
 							Official demo to showcase{" "}
