@@ -13,10 +13,10 @@ import SocialSignIn from './social'
 import { api } from '~/trpc/react'
 import { toast } from 'sonner'
 
-type NewUser = z.infer<typeof signInSchema>
+type User = z.infer<typeof signInSchema>
 
 const SignInForm = () => {
-    const defaultUser: NewUser = {
+    const defaultUser: User = {
         email: "",
         password: "",
         rememberMe: false

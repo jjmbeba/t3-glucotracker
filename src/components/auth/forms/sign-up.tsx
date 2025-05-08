@@ -1,162 +1,175 @@
 "use client"
-import { useRouter } from "next/navigation";
+import { formOptions, useForm } from "@tanstack/react-form";
 
-import { useState } from "react";
+import type { z } from "zod";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 
+import { Loader2 } from "lucide-react";
 import { Label } from "~/components/ui/label";
+import { signUpSchema } from "~/schemas/auth";
+
+type NewUser = z.infer<typeof signUpSchema>
 
 const SignUpForm = () => {
-    const [firstName, setFirstName] = useState("");
-    const [lastName, setLastName] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [passwordConfirmation, setPasswordConfirmation] = useState("");
-    const [image, setImage] = useState<File | null>(null);
-    const [imagePreview, setImagePreview] = useState<string | null>(null);
-    const router = useRouter();
-    const [loading, setLoading] = useState(false);
-
-
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (file) {
-            setImage(file);
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setImagePreview(reader.result as string);
-            };
-            reader.readAsDataURL(file);
+    const formOpts = formOptions({
+        defaultValues: {
+            firstName: "",
+            lastName: "",
+            email: "",
+            password: "",
+            confirmPassword: "",
         }
-    };
+    })
+
+    const form = useForm({
+        ...formOpts,
+        validators: {
+            onBlur: signUpSchema
+        },
+        onSubmit: async ({ value }) => {
+            console.log(value)
+        }
+    })
 
     return (
-        <div className="grid gap-4">
+        <form onSubmit={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+
+            form.handleSubmit()
+        }} className="grid gap-4">
             <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
                     <Label htmlFor="first-name">First name</Label>
-                    <Input
-                        id="first-name"
-                        placeholder="Max"
-                        required
+                    <form.Field
+                        name="firstName"
+                        children={(field) => (
+                            <>
+                                <Input
+                                    id="first-name"
+                                    placeholder="Max"
+                                    value={field.state.value}
+                                    onBlur={field.handleBlur}
+                                    onChange={(e) => field.handleChange(e.target.value)}
+                                />
+                                {field.state.meta.errors.map((error, i) => (
+                                    <div key={i} className="text-red-500 text-sm">
+                                        {error?.message}
+                                    </div>
+                                ))}
+                            </>
+                        )}
                     />
                 </div>
                 <div className="grid gap-2">
                     <Label htmlFor="last-name">Last name</Label>
-                    <Input
-                        id="last-name"
-                        placeholder="Robinson"
-                        required
+                    <form.Field
+                        name="lastName"
+                        children={(field) => (
+                            <>
+                                <Input
+                                    id="last-name"
+                                    placeholder="Robinson"
+                                    value={field.state.value}
+                                    onBlur={field.handleBlur}
+                                    onChange={(e) => field.handleChange(e.target.value)}
+                                />
+                                {field.state.meta.errors.map((error, i) => (
+                                    <div key={i} className="text-red-500 text-sm">
+                                        {error?.message}
+                                    </div>
+                                ))}
+                            </>
+                        )}
                     />
                 </div>
             </div>
             <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
-                <Input
-                    id="email"
-                    type="email"
-                    placeholder="m@example.com"
-                    required
-
+                <form.Field
+                    name="email"
+                    children={(field) => (
+                        <>
+                            <Input
+                                id="email"
+                                type="email"
+                                placeholder="m@example.com"
+                                value={field.state.value}
+                                onBlur={field.handleBlur}
+                                onChange={(e) => field.handleChange(e.target.value)}
+                            />
+                            {field.state.meta.errors.map((error, i) => (
+                                <div key={i} className="text-red-500 text-sm">
+                                    {error?.message}
+                                </div>
+                            ))}
+                        </>
+                    )}
                 />
             </div>
             <div className="grid gap-2">
                 <Label htmlFor="password">Password</Label>
-                <Input
-                    id="password"
-                    type="password"
-                    autoComplete="new-password"
-                    placeholder="Password"
+                <form.Field
+                    name="password"
+                    children={(field) => (
+                        <>
+                            <Input
+                                id="password"
+                                type="password"
+                                autoComplete="new-password"
+                                placeholder="Password"
+                                value={field.state.value}
+                                onBlur={field.handleBlur}
+                                onChange={(e) => field.handleChange(e.target.value)}
+                            />
+                            {field.state.meta.errors.map((error, i) => (
+                                <div key={i} className="text-red-500 text-sm">
+                                    {error?.message}
+                                </div>
+                            ))}
+                        </>
+                    )}
                 />
             </div>
             <div className="grid gap-2">
                 <Label htmlFor="password">Confirm Password</Label>
-                <Input
-                    id="password_confirmation"
-                    type="password"
-                    autoComplete="new-password"
-                    placeholder="Confirm Password"
+                <form.Field
+                    name="confirmPassword"
+                    children={(field) => (
+                        <>
+                            <Input
+                                id="password_confirmation"
+                                type="password"
+                                autoComplete="new-password"
+                                placeholder="Confirm Password"
+                                value={field.state.value}
+                                onBlur={field.handleBlur}
+                                onChange={(e) => field.handleChange(e.target.value)}
+                            />
+                            {field.state.meta.errors.map((error, i) => (
+                                <div key={i} className="text-red-500 text-sm">
+                                    {error?.message}
+                                </div>
+                            ))}
+                        </>
+                    )}
                 />
             </div>
-            <div className="grid gap-2">
-                <Label htmlFor="image">Profile Image (optional)</Label>
-                <div className="flex items-end gap-4">
-                    {/* {imagePreview && (
-						<div className="relative w-16 h-16 rounded-sm overflow-hidden">
-							<Image
-								src={imagePreview}
-								alt="Profile preview"
-								layout="fill"
-								objectFit="cover"
-							/>
-						</div>
-					)} */}
-                    <div className="flex items-center gap-2 w-full">
-                        <Input
-                            id="image"
-                            type="file"
-                            accept="image/*"
-                            className="w-full"
-                        />
-                        {/* {imagePreview && (
-							<X
-								className="cursor-pointer"
-								onClick={() => {
-									setImage(null);
-									setImagePreview(null);
-								}}
-							/>
-						)} */}
-                    </div>
-                </div>
-            </div>
-            <Button
-                type="submit"
-                className="w-full"
-                disabled={false}
-            // onClick={async () => {
-            // 	await signUp.email({
-            // 		email,
-            // 		password,
-            // 		name: `${firstName} ${lastName}`,
-            // 		image: image ? await convertImageToBase64(image) : "",
-            // 		callbackURL: "/dashboard",
-            // 		fetchOptions: {
-            // 			onResponse: () => {
-            // 				setLoading(false);
-            // 			},
-            // 			onRequest: () => {
-            // 				setLoading(true);
-            // 			},
-            // 			onError: (ctx) => {
-            // 				toast.error(ctx.error.message);
-            // 			},
-            // 			onSuccess: async () => {
-            // 				router.push("/dashboard");
-            // 			},
-            // 		},
-            // 	});
-            // }}
-            >
-                {/* {loading ? (
-					<Loader2 size={16} className="animate-spin" />
-				) : (
-					"Create an account"
-				)} */}
-                Create an account
-            </Button>
-        </div>
+            <form.Subscribe
+                selector={(state) => [state.canSubmit, state.isSubmitting]}
+                children={([canSubmit, isSubmitting]) => (
+                    <Button
+                        type="submit"
+                        className="w-full"
+                        disabled={!canSubmit || isSubmitting}
+                    >
+                        {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : "Create an account"}
+                    </Button>
+                )}
+            />
+        </form>
     )
-}
-
-async function convertImageToBase64(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
 }
 
 export default SignUpForm
