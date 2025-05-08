@@ -1,21 +1,74 @@
+"use client"
+
 import Link from 'next/link'
 import { Button } from '~/components/ui/button'
 import { Checkbox } from '~/components/ui/checkbox'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import SocialSignIn from './social'
+import { formOptions, useForm } from '@tanstack/react-form'
+import { z } from 'zod'
+import { Loader2 } from 'lucide-react'
 
+const signInSchema = z.object({
+    email: z.string().email(),
+    password: z.string().min(8, {
+        message: 'Password must be at least 8 characters long'
+    }),
+    rememberMe: z.boolean().optional()
+})
+
+type NewUser = z.infer<typeof signInSchema>
 
 const SignInForm = () => {
+    const defaultUser: NewUser = {
+        email: "",
+        password: "",
+        rememberMe: false
+    }
+
+    const formOpts = formOptions({
+        defaultValues: defaultUser
+    })
+
+    const form = useForm({
+        ...formOpts,
+        validators: {
+            onBlur: signInSchema
+        },
+        onSubmit: async ({ value }) => {
+            console.log(value)
+        }
+    })
+
     return (
-        <div className="grid gap-4">
+        <form onSubmit={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+
+            form.handleSubmit()
+        }} className="grid gap-4">
             <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
-                <Input
-                    id="email"
-                    type="email"
-                    placeholder="m@example.com"
-                    required
+                <form.Field
+                    name="email"
+                    children={(field) => (
+                        <>
+                            <Input
+                                id="email"
+                                type="email"
+                                placeholder="m@example.com"
+                                value={field.state.value}
+                                onBlur={field.handleBlur}
+                                onChange={(e) => field.handleChange(e.target.value)}
+                            />
+                            {field.state.meta.errors.map((error, i) => (
+                                <div key={i} className="text-red-500 text-sm">
+                                    {error?.message}
+                                </div>
+                            ))}
+                        </>
+                    )}
                 />
             </div>
 
@@ -26,35 +79,57 @@ const SignInForm = () => {
                         Forgot your password?
                     </Link>
                 </div>
-
-                <Input
-                    id="password"
-                    type="password"
-                    placeholder="password"
-                    autoComplete="password"
+                <form.Field
+                    name="password"
+                    children={(field) => (
+                        <>
+                            <Input
+                                id="password"
+                                type="password"
+                                placeholder="password"
+                                value={field.state.value}
+                                onBlur={field.handleBlur}
+                                onChange={(e) => field.handleChange(e.target.value)}
+                            />
+                            {field.state.meta.errors.map((error, i) => (
+                                <div key={i} className="text-red-500 text-sm">
+                                    {error?.message}
+                                </div>
+                            ))}
+                        </>
+                    )}
                 />
             </div>
 
             <div className="flex items-center gap-2">
-                <Checkbox
-                    id="remember"
+                <form.Field
+                    name="rememberMe"
+                    children={(field) => (
+                        <>
+                            <Checkbox
+                                id="remember"
+                                checked={field.state.value}
+                                onCheckedChange={(checked) => field.handleChange(checked === true)}
+                            />
+                            <Label htmlFor="remember">Remember me</Label>
+                        </>
+                    )}
                 />
-                <Label htmlFor="remember">Remember me</Label>
             </div>
-
-            <Button
-                type="submit"
-                className="w-full"
-                disabled={false}
-            // onClick={async () => {
-            //     await signIn.email({ email, password });
-            // }}
-            >
-                {/* {loading ? <Loader2 size={16} className="animate-spin" /> : "Login"} */}
-                Login
-            </Button>
+            <form.Subscribe
+                selector={(state) => [state.canSubmit, state.isSubmitting]}
+                children={([canSubmit, isSubmitting]) => (
+                    <Button
+                        type="submit"
+                        className="w-full"
+                        disabled={!canSubmit || isSubmitting}
+                    >
+                        {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : "Login"}
+                    </Button>
+                )}
+            />
             <SocialSignIn />
-        </div>
+        </form>
     )
 }
 
