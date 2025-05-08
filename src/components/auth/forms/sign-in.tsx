@@ -1,22 +1,16 @@
 "use client"
 
+import { formOptions, useForm } from '@tanstack/react-form'
+import { Loader2 } from 'lucide-react'
 import Link from 'next/link'
+import { z } from 'zod'
 import { Button } from '~/components/ui/button'
 import { Checkbox } from '~/components/ui/checkbox'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
+import { signInSchema } from '~/schemas/auth'
 import SocialSignIn from './social'
-import { formOptions, useForm } from '@tanstack/react-form'
-import { z } from 'zod'
-import { Loader2 } from 'lucide-react'
-
-const signInSchema = z.object({
-    email: z.string().email(),
-    password: z.string().min(8, {
-        message: 'Password must be at least 8 characters long'
-    }),
-    rememberMe: z.boolean().optional()
-})
+import { api } from '~/trpc/react'
 
 type NewUser = z.infer<typeof signInSchema>
 
@@ -31,13 +25,15 @@ const SignInForm = () => {
         defaultValues: defaultUser
     })
 
+    const { mutate: signIn, isPending: isSignInPending } = api.auth.signIn.useMutation()
+
     const form = useForm({
         ...formOpts,
         validators: {
             onBlur: signInSchema
         },
         onSubmit: async ({ value }) => {
-            console.log(value)
+            signIn(value)
         }
     })
 
@@ -122,9 +118,9 @@ const SignInForm = () => {
                     <Button
                         type="submit"
                         className="w-full"
-                        disabled={!canSubmit || isSubmitting}
+                        disabled={!canSubmit || isSubmitting || isSignInPending}
                     >
-                        {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : "Login"}
+                        {isSubmitting || isSignInPending ? <Loader2 size={16} className="animate-spin" /> : "Login"}
                     </Button>
                 )}
             />
