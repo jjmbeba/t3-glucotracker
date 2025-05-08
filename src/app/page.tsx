@@ -1,53 +1,63 @@
-import Link from "next/link";
-
-import { LatestPost } from "~/app/_components/post";
-import { HydrateClient, api } from "~/trpc/server";
+import { Suspense } from "react";
+import { SignInButton } from "../components/auth/sign-in-button";
 
 export default async function Home() {
-	const hello = await api.post.hello({ text: "from tRPC" });
-
-	void api.post.getLatest.prefetch();
-
+	const features = [
+		"Email & Password",
+		"Organization | Teams",
+		"Passkeys",
+		"Multi Factor",
+		"Password Reset",
+		"Email Verification",
+		"Roles & Permissions",
+		"Rate Limiting",
+		"Session Management",
+	];
 	return (
-		<HydrateClient>
-			<main className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
-				<div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-					<h1 className="font-extrabold text-5xl tracking-tight sm:text-[5rem]">
-						Create <span className="text-[hsl(280,100%,70%)]">T3</span> App
-					</h1>
-					<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-8">
-						<Link
-							className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
-							href="https://create.t3.gg/en/usage/first-steps"
+		<div className="min-h-[80vh] flex items-center justify-center overflow-hidden no-visible-scrollbar px-6 md:px-0">
+			<main className="flex flex-col gap-4 row-start-2 items-center justify-center">
+				<div className="flex flex-col gap-1">
+					<h3 className="font-bold text-4xl text-black dark:text-white text-center">
+						Better Auth.
+					</h3>
+					<p className="text-center break-words text-sm md:text-base">
+						Official demo to showcase{" "}
+						<a
+							href="https://better-auth.com"
 							target="_blank"
+							className="italic underline"
 						>
-							<h3 className="font-bold text-2xl">First Steps →</h3>
-							<div className="text-lg">
-								Just the basics - Everything you need to know to set up your
-								database and authentication.
+							better-auth.
+						</a>{" "}
+						features and capabilities. <br />
+					</p>
+				</div>
+				<div className="md:w-10/12 w-full flex flex-col gap-4">
+					<div className="flex flex-col gap-3 pt-2 flex-wrap">
+						<div className="border-y py-2 border-dotted bg-secondary/60 opacity-80">
+							<div className="text-xs flex items-center gap-2 justify-center text-muted-foreground ">
+								<span className="text-center">
+									All features on this demo are implemented with Better Auth
+									without any custom backend code
+								</span>
 							</div>
-						</Link>
-						<Link
-							className="flex max-w-xs flex-col gap-4 rounded-xl bg-white/10 p-4 hover:bg-white/20"
-							href="https://create.t3.gg/en/introduction"
-							target="_blank"
-						>
-							<h3 className="font-bold text-2xl">Documentation →</h3>
-							<div className="text-lg">
-								Learn more about Create T3 App, the libraries it uses, and how
-								to deploy it.
-							</div>
-						</Link>
+						</div>
+						<div className="flex gap-2 justify-center flex-wrap">
+							{features.map((feature) => (
+								<span
+									className="border-b pb-1 text-muted-foreground text-xs cursor-pointer hover:text-foreground duration-150 ease-in-out transition-all hover:border-foreground flex items-center gap-1"
+									key={feature}
+								>
+									{feature}.
+								</span>
+							))}
+						</div>
 					</div>
-					<div className="flex flex-col items-center gap-2">
-						<p className="text-2xl text-white">
-							{hello ? hello.greeting : "Loading tRPC query..."}
-						</p>
-					</div>
-
-					<LatestPost />
+					<Suspense fallback={<p>Loading...</p>}>
+						<SignInButton />
+					</Suspense>
 				</div>
 			</main>
-		</HydrateClient>
+		</div>
 	);
 }
