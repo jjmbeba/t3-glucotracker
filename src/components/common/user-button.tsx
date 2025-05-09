@@ -13,15 +13,17 @@ type Session = Awaited<ReturnType<typeof auth.api.getSession>>
 const UserButton = ({ session }: { session: Session }) => {
     const router = useRouter()
     const initials = useMemo(() => {
-        return session?.user.name?.split(' ').map(name => name[0]).join('')
+        if(!session?.user.name) return ''
+
+        return session.user.name.split(' ').map(name => name[0]).join('')
     }, [session?.user.name])
 
     return (
-        <div>
+        <div role="navigation" aria-label="User menu">
             {session?.user.name ? (
                 <div className='flex gap-4'>
-                    <Avatar>
-                        <AvatarImage src={session?.user.image ?? undefined} />
+                    <Avatar aria-label={`Profile picture of ${session?.user.name}`}>
+                        <AvatarImage src={session?.user.image ?? undefined} alt={session?.user.name ?? 'Profile picture'} />
                         <AvatarFallback>
                             {initials}
                         </AvatarFallback>

@@ -3,7 +3,7 @@ import SettingsCard from '~/components/settings/settings-card'
 const Page = () => {
     return (
         <div className="container mx-auto px-4 py-8 max-w-4xl">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">
+            <h2 className="page-title">
                 Settings
             </h2>
             <p className="text-gray-600 mb-8">

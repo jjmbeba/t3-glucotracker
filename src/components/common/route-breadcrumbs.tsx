@@ -9,6 +9,8 @@ const RouteBreadcrumbs = () => {
     const pathname = usePathname()
     const pathnames = pathname.split('/').filter(Boolean)
 
+    if(pathnames.length === 0) return null
+
     return (
         <Breadcrumb>
             <BreadcrumbList>
@@ -17,8 +19,8 @@ const RouteBreadcrumbs = () => {
                         {capitalize(pathnames[0] ?? '')}
                     </BreadcrumbLink>
                 </BreadcrumbItem>
-                {pathnames.slice(1).map((pathname) => (
-                    <div key={pathname} className='flex items-center gap-2'>
+                {pathnames.slice(1).map((pathname, index) => (
+                    <div key={`${pathname}-${index}`} className='flex items-center gap-2'>
                         <BreadcrumbSeparator className="hidden md:block" />
                         <BreadcrumbItem>
                             <BreadcrumbPage>{capitalize(pathname)}</BreadcrumbPage>
