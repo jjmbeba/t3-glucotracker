@@ -10,7 +10,7 @@ import Link from 'next/link'
 import { cn } from '~/lib/utils'
 type Session = Awaited<ReturnType<typeof auth.api.getSession>>
 
-const UserButton = ({ session }: { session: Session }) => {
+const UserButton = ({ session, className }: { session: Session, className?: string }) => {
     const router = useRouter()
     const initials = useMemo(() => {
         if(!session?.user.name) return ''
@@ -40,7 +40,7 @@ const UserButton = ({ session }: { session: Session }) => {
                     </Button>
                 </div>
             ) : (
-                <Link href="/sign-in" className={cn(buttonVariants({ variant: 'outline' }))}>
+                <Link href="/sign-in" className={cn(buttonVariants({ variant: 'outline' }), className)}>
                     Sign in
                 </Link>
             )}

@@ -15,6 +15,10 @@ import {
   SidebarRail,
 } from "~/components/ui/sidebar"
 import Link from "next/link"
+import type { auth } from "~/auth"
+import UserButton from "./common/user-button"
+
+type Session = Awaited<ReturnType<typeof auth.api.getSession>>
 
 // This is sample data.
 const data = {
@@ -79,7 +83,7 @@ const data = {
   ],
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({ session, ...props }: React.ComponentProps<typeof Sidebar> & { session: Session }) {
   return (
     <Sidebar {...props}>
       <SidebarHeader>
@@ -99,7 +103,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
+        <SidebarGroup className="flex flex-col justify-between leading-none border border-red-500 flex-1">
           <SidebarMenu>
             {data.navMain.map((item) => (
               <SidebarMenuItem key={item.title}>
@@ -113,7 +117,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     {item.items.map((item) => (
                       <SidebarMenuSubItem key={item.title}>
                         <SidebarMenuSubButton asChild isActive={item.isActive}>
-                          <a href={item.url}>{item.title}</a>
+                          <Link href={item.url}>{item.title}</Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                     ))}
@@ -122,6 +126,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </SidebarMenuItem>
             ))}
           </SidebarMenu>
+          <UserButton session={session} className="w-full" />
         </SidebarGroup>
       </SidebarContent>
       <SidebarRail />
