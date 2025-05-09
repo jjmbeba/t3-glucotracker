@@ -5,7 +5,9 @@ import { useMemo } from 'react'
 import type { auth } from '~/auth'
 import { signOut } from '~/lib/auth-client'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
-import { Button } from '../ui/button'
+import { Button, buttonVariants } from '../ui/button'
+import Link from 'next/link'
+import { cn } from '~/lib/utils'
 type Session = Awaited<ReturnType<typeof auth.api.getSession>>
 
 const UserButton = ({ session }: { session: Session }) => {
@@ -36,9 +38,9 @@ const UserButton = ({ session }: { session: Session }) => {
                     </Button>
                 </div>
             ) : (
-                <Button className='flex gap-2'>
+                <Link href="/sign-in" className={cn(buttonVariants({ variant: 'outline' }))}>
                     Sign in
-                </Button>
+                </Link>
             )}
         </div>
     )
