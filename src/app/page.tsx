@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { HydrateClient } from "~/trpc/server";
-import { SignInButton } from "../../components/auth/sign-in-button";
+import { SignInButton } from "../components/auth/sign-in-button";
 
 export default async function Home() {
 	const features = [

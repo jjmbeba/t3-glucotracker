@@ -116,10 +116,15 @@
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
+	* {
+		@apply border-border outline-ring/50;
 	}
-  body {
-    @apply bg-background text-foreground;
+
+	body {
+		@apply bg-background text-foreground;
+	}
+
+	.page-title {
+		@apply scroll-m-20 pb-2 text-2xl font-semibold tracking-tight first:mt-0;
 	}
 }
