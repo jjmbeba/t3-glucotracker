@@ -13,3 +13,8 @@ export async function convertImageToBase64(file: File): Promise<string> {
     reader.readAsDataURL(file);
   });
 }
+
+export function capitalize(str: string) {
+  return str.charAt(0).toUpperCase() + str.slice(1)
+}
+
