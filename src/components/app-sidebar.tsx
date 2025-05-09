@@ -24,15 +24,57 @@ const data = {
       url: "/dashboard",
       items: [
         {
-          title: "Glucose Levels",
-          url: "/dashboard/logs",
-        },
-        {
-          title: "Project Structure",
-          url: "#",
+          title: "Glucose Logs",
+          url: "/dashboard/logs/glucose",
           isActive: true,
         },
+        {
+          title: "Meal Logs",
+          url: "/dashboard/logs/meal",
+        },
+        {
+          title: "Medication Logs",
+          url: "/dashboard/logs/medication",
+        },
       ],
+    },
+    {
+      title: "Reports",
+      url: "/reports",
+      items: [
+        {
+          title: "Glucose Trends",
+          url: "/reports/glucose-trends",
+        }
+      ]
+    },
+    {
+      title: "Targets",
+      url: "/targets",
+      items: [
+        {
+          title: "Glucose",
+          url: "/targets/glucose",
+        },
+        {
+          title: "Meal",
+          url: "/targets/meal",
+        },
+      ]
+    },
+    {
+      title: "Settings",
+      url: "/settings",
+      items: [
+        {
+          title: "Profile",
+          url: "/settings/profile",
+        },
+        {
+          title: "Medication Management",
+          url: "/settings/medication-management",
+        },
+      ]
     },
   ],
 }
