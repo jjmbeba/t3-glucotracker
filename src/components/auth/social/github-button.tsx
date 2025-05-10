@@ -1,18 +1,19 @@
-import React from 'react'
-import { cn } from '~/lib/utils'
 import { Button } from '~/components/ui/button'
+import { signIn } from '~/lib/auth-client'
+import { cn } from '~/lib/utils'
 
 const GithubButton = () => {
     return (
         <Button
             variant="outline"
+            type='button'
             className={cn("w-full gap-2")}
-        // onClick={async () => {
-        //     await signIn.social({
-        //         provider: "github",
-        //         callbackURL: "/dashboard",
-        //     });
-        // }}
+            onClick={async () => {
+                await signIn.social({
+                    provider: "github",
+                    callbackURL: "/dashboard",
+                });
+            }}
         >
             <svg
                 xmlns="http://www.w3.org/2000/svg"

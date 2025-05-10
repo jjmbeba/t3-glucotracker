@@ -18,6 +18,11 @@ export const auth = betterAuth({
             prompt: 'select_account',
             clientId: env.GOOGLE_CLIENT_ID,
             clientSecret: env.GOOGLE_CLIENT_SECRET,
+        },
+        github: {
+            enabled: true,
+            clientId: env.GITHUB_CLIENT_ID,
+            clientSecret: env.GITHUB_CLIENT_SECRET,
         }
     },
     session: {
