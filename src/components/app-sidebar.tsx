@@ -103,7 +103,7 @@ export function AppSidebar({ session, ...props }: React.ComponentProps<typeof Si
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup className="flex flex-col justify-between leading-none border border-red-500 flex-1">
+        <SidebarGroup className="flex flex-col justify-between leading-none flex-1">
           <SidebarMenu>
             {data.navMain.map((item) => (
               <SidebarMenuItem key={item.title}>

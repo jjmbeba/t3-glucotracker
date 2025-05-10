@@ -1,13 +1,13 @@
 "use client"
 
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useMemo } from 'react'
 import type { auth } from '~/auth'
 import { signOut } from '~/lib/auth-client'
+import { cn } from '~/lib/utils'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import { Button, buttonVariants } from '../ui/button'
-import Link from 'next/link'
-import { cn } from '~/lib/utils'
 type Session = Awaited<ReturnType<typeof auth.api.getSession>>
 
 const UserButton = ({ session, className }: { session: Session, className?: string }) => {

@@ -1,5 +1,8 @@
+"use client"
+
 import React from 'react'
 import { Button } from '~/components/ui/button'
+import { signIn } from '~/lib/auth-client'
 import { cn } from '~/lib/utils'
 
 const GoogleButton = () => {
@@ -7,12 +10,13 @@ const GoogleButton = () => {
         <Button
             variant="outline"
             className={cn("w-full gap-2")}
-        // onClick={async () => {
-        //     await signIn.social({
-        //         provider: "google",
-        //         callbackURL: "/dashboard",
-        //     });
-        // }}
+            type='button'
+            onClick={async () => {
+                await signIn.social({
+                    provider: 'google',
+                    callbackURL: '/dashboard'
+                })
+            }}
         >
             <svg
                 xmlns="http://www.w3.org/2000/svg"
