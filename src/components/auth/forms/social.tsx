@@ -2,7 +2,6 @@ import { cn } from "~/lib/utils"
 
 import GithubButton from "../social/github-button"
 import GoogleButton from "../social/google-button"
-import MicrosoftButton from "../social/microsoft-button"
 
 const SocialSignIn = () => {
     return (
@@ -14,7 +13,6 @@ const SocialSignIn = () => {
         >
             <GoogleButton />
             <GithubButton />
-            <MicrosoftButton />
         </div>
     )
 }
