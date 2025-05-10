@@ -126,7 +126,7 @@ export function AppSidebar({ session, ...props }: React.ComponentProps<typeof Si
               </SidebarMenuItem>
             ))}
           </SidebarMenu>
-          <UserButton session={session} className="w-full" />
+          <UserButton session={session} showLogout={true} className="w-full" />
         </SidebarGroup>
       </SidebarContent>
       <SidebarRail />

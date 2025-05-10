@@ -11,7 +11,7 @@ import SignInForm from "../forms/sign-in";
 
 export default function SignIn() {
     return (
-        <Card className="max-w-md rounded-none">
+        <Card className="max-w-md rounded-none border-0 shadow-none md:border md:shadow">
             <CardHeader>
                 <CardTitle className="text-lg md:text-xl">Sign In</CardTitle>
                 <CardDescription className="text-xs md:text-sm">
