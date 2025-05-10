@@ -41,7 +41,6 @@ const SignUpForm = () => {
                     toast.error(error.error.message)
                 },
                 onSuccess: (data) => {
-                    console.log(data)
                     toast.success("Sign up successful")
                     router.push('/')
                 }
