@@ -1,4 +1,5 @@
 import PersonalInformation from '~/components/profile/forms/personal-info'
+import ProfileImage from '~/components/profile/forms/profle-image'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '~/components/ui/card'
 
 const ProfilePage = () => {
@@ -19,6 +20,19 @@ const ProfilePage = () => {
           </CardHeader>
           <CardContent>
             <PersonalInformation />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              Profile Image
+            </CardTitle>
+            <CardDescription>
+              Update your profile image.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ProfileImage />
           </CardContent>
         </Card>
       </div>
