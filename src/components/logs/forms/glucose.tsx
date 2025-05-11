@@ -17,7 +17,7 @@ import {
     SelectValue,
 } from "~/components/ui/select"
 import { Textarea } from '~/components/ui/textarea'
-import { TimePickerDemo } from '~/components/ui/time-picker'
+import { TimePicker } from '~/components/ui/time-picker'
 import { toISOStringWithTimezone } from '~/lib/time-picker-utils'
 import { capitalize, cn } from '~/lib/utils'
 import { glucoseFormSchema } from '~/schemas/logs'
@@ -72,6 +72,7 @@ const GlucoseForm = () => {
                                 <>
                                     <Input
                                         id="glucose"
+                                        type="number"
                                         placeholder="100"
                                         value={field.state.value}
                                         onBlur={field.handleBlur}
@@ -183,7 +184,7 @@ const GlucoseForm = () => {
                                                     disabled={(date) => date > new Date()}
                                                 />
                                                 <div className="p-3 border-t border-border">
-                                                    <TimePickerDemo
+                                                    <TimePicker
                                                         setDate={(date) => field.handleChange(toISOStringWithTimezone(date ?? new Date()))}
                                                         date={new Date(field.state.value)}
                                                     />

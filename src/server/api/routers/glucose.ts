@@ -24,6 +24,11 @@ export const glucoseRouter = createTRPCRouter({
                     code: "INTERNAL_SERVER_ERROR",
                     message: error.message
                 })
+            } else {
+                throw new TRPCError({
+                    code: "INTERNAL_SERVER_ERROR",
+                    message: "An unknown error occurred"
+                })
             }
         }
     }),
