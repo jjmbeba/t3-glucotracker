@@ -100,17 +100,17 @@ const ProfileImage = () => {
 
                 form.handleSubmit()
             }}>
-                <div className='flex items-center gap-10'>
-                    <Avatar className='size-24'>
+                <div className='flex flex-col sm:flex-row items-center gap-4 sm:gap-10'>
+                    <Avatar className='size-20 sm:size-24'>
                         <AvatarImage src={user?.image ?? ''} />
                         <AvatarFallback>
                             {user.name.charAt(0)}
                         </AvatarFallback>
                     </Avatar>
                     {value ? (
-                        <div className='flex items-center gap-10 text-sm'>
+                        <div className='flex flex-col sm:flex-row items-center gap-4 sm:gap-10 text-sm'>
                             Changes to
-                            <Avatar className='size-24'>
+                            <Avatar className='size-20 sm:size-24'>
                                 <AvatarImage src={value} />
                                 <AvatarFallback>
                                     {user.name.charAt(0)}
@@ -120,13 +120,13 @@ const ProfileImage = () => {
                     ) : (
                         <div className='w-full' {...getRootProps()}>
                             <Input {...getInputProps()} />
-                            <div className='cursor-pointer border-2 border-dashed border-gray-300 rounded-md p-4 w-full flex items-center justify-center text-sm h-24'>
+                            <div className='cursor-pointer border-2 border-dashed border-gray-300 rounded-md p-4 w-full flex items-center justify-center text-sm h-20 sm:h-24'>
                                 {isUploading ? (
                                     <Loader2 size={16} className='animate-spin' />
                                 ) : isDragActive ? (
                                     <p className='animate-pulse'>Drop the files here ...</p>
                                 ) : (
-                                    <p>Drag 'n' drop some files here, or click to select files</p>
+                                    <p className="text-center">Drag 'n' drop some files here, or click to select files</p>
                                 )}
                             </div>
                         </div>
@@ -143,17 +143,21 @@ const ProfileImage = () => {
                 <form.Subscribe
                     selector={(state) => [state.canSubmit, state.isSubmitting]}
                     children={([canSubmit, isSubmitting]) => (
-                        <div className='mt-5 flex items-end gap-3'>
+                        <div className='mt-5 flex flex-col sm:flex-row items-center sm:items-end gap-3'>
                             <Button
-                                className='mt-6'
+                                className='w-full sm:w-auto'
                                 type="submit"
                                 disabled={!canSubmit || isSubmitting || isUploading}
                             >
                                 {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : "Edit Profile Image"}
                             </Button>
-                            <Button variant='outline' type='button' onClick={() => {
-                                form.setFieldValue('profileImageUrl', '')
-                            }}>
+                            <Button 
+                                variant='outline' 
+                                type='button' 
+                                className='w-full sm:w-auto'
+                                onClick={() => {
+                                    form.setFieldValue('profileImageUrl', '')
+                                }}>
                                 Cancel
                             </Button>
                         </div>
