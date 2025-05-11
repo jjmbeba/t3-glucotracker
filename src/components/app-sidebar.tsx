@@ -29,16 +29,16 @@ const data = {
       items: [
         {
           title: "Glucose Logs",
-          url: "/dashboard/logs/glucose",
+          url: "/logs/glucose",
           isActive: true,
         },
         {
           title: "Meal Logs",
-          url: "/dashboard/logs/meal",
+          url: "/logs/meal",
         },
         {
           title: "Medication Logs",
-          url: "/dashboard/logs/medication",
+          url: "/logs/medication",
         },
       ],
     },
