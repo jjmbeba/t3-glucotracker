@@ -56,7 +56,7 @@ const GlucoseForm = () => {
 
                 form.handleSubmit()
             }} className="grid gap-4 mt-3">
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div className="grid gap-2">
                         <Label htmlFor="glucose">Glucose</Label>
                         <form.Field
@@ -155,7 +155,7 @@ const GlucoseForm = () => {
                                                     <Button
                                                         variant="outline"
                                                         className={cn(
-                                                            "w-[280px] justify-start text-left font-normal",
+                                                            "w-full md:w-[280px] justify-start text-left font-normal",
                                                             !field.state.value && "text-muted-foreground"
                                                         )}
                                                     >
@@ -193,7 +193,7 @@ const GlucoseForm = () => {
                             }}
                         />
                     </div>
-                    <div className="grid gap-2">
+                    <div className="grid gap-2 col-span-1 md:col-span-2 lg:col-span-1">
                         <Label htmlFor="notes">Notes</Label>
                         <form.Field
                             name="notes"
