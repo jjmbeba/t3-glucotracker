@@ -78,3 +78,18 @@ export const verification = createTable("verification", (d) => ({
 	updatedAt: d.timestamp('updated_at')
 }))
 
+export const glucoseLog = createTable("glucose_log", (d) => ({
+	id: d.integer('id').primaryKey().generatedByDefaultAsIdentity(),
+	userId: d.text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+	glucose: d.integer('glucose').notNull(),
+	date: d.timestamp('date').notNull(),
+	type: d.text('type').notNull(),
+	units: d.text('units').notNull(),
+	notes: d.text('notes'),
+	createdAt: d
+		.timestamp({ withTimezone: true })
+		.default(sql`CURRENT_TIMESTAMP`)
+		.notNull(),
+	updatedAt: d.timestamp({ withTimezone: true }).$onUpdate(() => new Date()),
+}))
+

@@ -2,8 +2,8 @@
 
 import { useForm } from '@tanstack/react-form'
 import dayjs from 'dayjs'
-import { CalendarIcon } from 'lucide-react'
-import { z } from 'zod'
+import { CalendarIcon, Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '~/components/ui/button'
 import { Calendar } from '~/components/ui/calendar'
 import { Input } from '~/components/ui/input'
@@ -20,31 +20,38 @@ import { Textarea } from '~/components/ui/textarea'
 import { TimePickerDemo } from '~/components/ui/time-picker'
 import { toISOStringWithTimezone } from '~/lib/time-picker-utils'
 import { capitalize, cn } from '~/lib/utils'
-
-const glucoseFormSchema = z.object({
-    glucose: z.number().min(0).max(500),
-    date: z.string(),
-    // time: z.string().datetime(),
-    type: z.enum(['before-meal', 'after-meal', 'bedtime', 'fasting', 'random']),
-    units: z.enum(['imperial', 'metric']),
-    notes: z.string(),
-})
+import { glucoseFormSchema } from '~/schemas/logs'
+import { api } from '~/trpc/react'
 
 const GlucoseForm = () => {
+    const { mutate: createGlucoseLog, isPending: isGlucoseLogPending } = api.glucose.create.useMutation({
+        onSuccess: () => {
+            form.reset()
+
+            toast.success("Glucose log created successfully")
+        },
+        onError: (error) => {
+            toast.error(error.message)
+        }
+    })
+
     const form = useForm({
         defaultValues: {
             glucose: 0,
             type: 'before-meal',
             date: new Date().toISOString(),
             units: 'imperial',
-            // time: new Date().toLocaleTimeString(),
             notes: '',
         },
         validators: {
             onChange: glucoseFormSchema
         },
         onSubmit: ({ value }) => {
-            console.log(value)
+            createGlucoseLog({
+                ...value,
+                type: value.type as "before-meal" | "after-meal" | "bedtime" | "fasting" | "random",
+                units: value.units as "imperial" | "metric",
+            })
         }
     })
 
@@ -151,22 +158,22 @@ const GlucoseForm = () => {
                                 return (
                                     <>
                                         <Popover>
-                                                <PopoverTrigger asChild>
-                                                    <Button
-                                                        variant="outline"
-                                                        className={cn(
-                                                            "w-full md:w-[280px] justify-start text-left font-normal",
-                                                            !field.state.value && "text-muted-foreground"
-                                                        )}
-                                                    >
-                                                        <CalendarIcon className="mr-2 h-4 w-4" />
-                                                        {field.state.value ? (
-                                                            dayjs(field.state.value).format("DD MMM YYYY HH:mm")
-                                                        ) : (
-                                                            <span>Pick a date</span>
-                                                        )}
-                                                    </Button>
-                                                </PopoverTrigger>
+                                            <PopoverTrigger asChild>
+                                                <Button
+                                                    variant="outline"
+                                                    className={cn(
+                                                        "w-full md:w-[280px] justify-start text-left font-normal",
+                                                        !field.state.value && "text-muted-foreground"
+                                                    )}
+                                                >
+                                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                                    {field.state.value ? (
+                                                        dayjs(field.state.value).format("DD MMM YYYY HH:mm")
+                                                    ) : (
+                                                        <span>Pick a date</span>
+                                                    )}
+                                                </Button>
+                                            </PopoverTrigger>
                                             <PopoverContent className="w-auto p-0">
                                                 <Calendar
                                                     mode="single"
@@ -221,8 +228,8 @@ const GlucoseForm = () => {
                         selector={(state) => [state.canSubmit, state.isSubmitting]}
                         children={([canSubmit, isSubmitting]) => (
                             <div className='flex gap-2'>
-                                <Button type='submit' disabled={!canSubmit || isSubmitting}>
-                                    {isSubmitting ? 'Submitting...' : 'Submit'}
+                                <Button type='submit' disabled={!canSubmit || isSubmitting || isGlucoseLogPending}>
+                                    {isSubmitting || isGlucoseLogPending ? <Loader2 className='size-4 animate-spin' /> : 'Submit'}
                                 </Button>
                                 <Button type='button' variant={'outline'} onClick={() => {
                                     form.reset()
