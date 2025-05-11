@@ -56,7 +56,6 @@ const ProfileImage = () => {
             onChange: profileImageSchema
         },
         onSubmit: async ({ value }) => {
-            console.log(value.profileImageUrl)
             await updateUser({
                 image: value.profileImageUrl,
             }, {

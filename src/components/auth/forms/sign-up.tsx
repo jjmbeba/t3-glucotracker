@@ -48,8 +48,6 @@ const SignUpForm = () => {
         },
     })
 
-    const { data } = useSession()
-
     return (
         <form onSubmit={(e) => {
             e.preventDefault()
