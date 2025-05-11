@@ -1,6 +1,8 @@
-import * as React from "react"
 import { GalleryVerticalEnd } from "lucide-react"
+import * as React from "react"
 
+import Link from "next/link"
+import type { auth } from "~/auth"
 import {
   Sidebar,
   SidebarContent,
@@ -14,8 +16,6 @@ import {
   SidebarMenuSubItem,
   SidebarRail,
 } from "~/components/ui/sidebar"
-import Link from "next/link"
-import type { auth } from "~/auth"
 import UserButton from "./common/user-button"
 
 type Session = Awaited<ReturnType<typeof auth.api.getSession>>
@@ -83,7 +83,7 @@ const data = {
   ],
 }
 
-export function AppSidebar({ session, ...props }: React.ComponentProps<typeof Sidebar> & { session: Session }) {
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar {...props}>
       <SidebarHeader>
@@ -126,7 +126,7 @@ export function AppSidebar({ session, ...props }: React.ComponentProps<typeof Si
               </SidebarMenuItem>
             ))}
           </SidebarMenu>
-          <UserButton session={session} className="w-full" />
+          <UserButton showLogout={true} className="w-full" />
         </SidebarGroup>
       </SidebarContent>
       <SidebarRail />

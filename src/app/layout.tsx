@@ -3,8 +3,12 @@ import "~/styles/globals.css";
 import type { Metadata } from "next";
 import { Geist } from "next/font/google";
 
-import { TRPCReactProvider } from "~/trpc/react";
 import { Toaster } from "~/components/ui/sonner";
+import { TRPCReactProvider } from "~/trpc/react";
+
+import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
+import { extractRouterConfig } from "uploadthing/server";
+import { ourFileRouter } from "./api/uploadthing/core";
 
 export const metadata: Metadata = {
 	title: "GlucoTrack",
@@ -23,6 +27,9 @@ export default function RootLayout({
 	return (
 		<html lang="en" className={`${geist.variable}`}>
 			<body>
+				<NextSSRPlugin
+					routerConfig={extractRouterConfig(ourFileRouter)}
+				/>
 				<TRPCReactProvider>{children}</TRPCReactProvider>
 				<Toaster richColors />
 			</body>

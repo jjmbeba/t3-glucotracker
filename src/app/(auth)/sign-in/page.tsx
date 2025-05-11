@@ -5,14 +5,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 export default function Page() {
     return (
         <div className="w-full">
-            <div className="flex items-center flex-col justify-center w-full md:py-10">
-                <div className="md:w-[400px]">
-                    <Tabs defaultValue="sign-in" className="w-[400px]">
-                        <TabsList>
-                            <TabsTrigger value="sign-in">
+            <div className="flex items-center flex-col justify-center w-full px-4 py-6 md:py-10">
+                <div className="w-full max-w-[400px]">
+                    <Tabs defaultValue="sign-in" className="w-full">
+                        <TabsList className="w-full">
+                            <TabsTrigger value="sign-in" className="flex-1">
                                 Sign In
                             </TabsTrigger>
-                            <TabsTrigger value="sign-up">
+                            <TabsTrigger value="sign-up" className="flex-1">
                                 Sign Up
                             </TabsTrigger>
                         </TabsList>
