@@ -185,7 +185,11 @@ const GlucoseForm = () => {
                                                 />
                                                 <div className="p-3 border-t border-border">
                                                     <TimePicker
-                                                        setDate={(date) => field.handleChange(toISOStringWithTimezone(date ?? new Date()))}
+                                                        setDate={(date) => {
+                                                            if(!date) return;
+
+                                                            field.handleChange(toISOStringWithTimezone(date))
+                                                        }}
                                                         date={new Date(field.state.value)}
                                                     />
                                                 </div>
