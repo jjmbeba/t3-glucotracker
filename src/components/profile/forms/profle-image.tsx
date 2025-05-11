@@ -9,6 +9,7 @@ import { z } from 'zod'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
+import { Skeleton } from '~/components/ui/skeleton'
 import { getSession, updateUser } from '~/lib/auth-client'
 import { useUploadThing } from '~/lib/uploadthing'
 
@@ -17,6 +18,20 @@ const profileImageSchema = z.object({
         message: 'Upload a valid image'
     })
 })
+
+const ProfileImageSkeleton = () => {
+    return (
+        <div className='flex flex-col sm:flex-row items-center gap-4 sm:gap-10'>
+            <Skeleton className='size-20 sm:size-24 rounded-full' />
+            <div className='w-full'>
+                <Skeleton className='h-20 sm:h-24 w-full rounded-md' />
+            </div>
+            <div className='w-full sm:w-auto'>
+                <Skeleton className='h-10 w-full sm:w-[200px]' />
+            </div>
+        </div>
+    )
+}
 
 const ProfileImage = () => {
     const queryClient = useQueryClient()
@@ -83,7 +98,7 @@ const ProfileImage = () => {
     })
 
     if (isFetchSessionPending) {
-        return <div>Loading...</div>
+        return <ProfileImageSkeleton />
     }
 
     if (!session?.data?.user) {
