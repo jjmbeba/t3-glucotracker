@@ -1,25 +1,33 @@
 "use client"
 
-import { useForm } from '@tanstack/react-form'
+import { useField, useForm } from '@tanstack/react-form'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useDropzone } from '@uploadthing/react'
 import { Loader2 } from 'lucide-react'
-import React from 'react'
 import { toast } from 'sonner'
 import { z } from 'zod'
 import { Avatar, AvatarFallback, AvatarImage } from '~/components/ui/avatar'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
-import { useSession } from '~/lib/auth-client'
+import { getSession, updateUser } from '~/lib/auth-client'
+import { useUploadThing } from '~/lib/uploadthing'
 
 const profileImageSchema = z.object({
-    image: z.instanceof(File).nullable()
-}).refine((data) => {
-    if (!data.image) {
-        return false
-    }
-}, { message: 'Please select an image' })
+    profileImageUrl: z.string().url({
+        message: 'Upload a valid image'
+    })
+})
 
 const ProfileImage = () => {
-    const { data, isPending: isFetchSessionPending, error, refetch } = useSession()
+    const queryClient = useQueryClient()
+    const { data : session, isPending: isFetchSessionPending, error } = useQuery({
+        queryKey: ['session'],
+        queryFn: () => {
+            const session = getSession()
+            return session
+        }
+    })
+
 
     if (error) {
         toast.error(error.message)
@@ -27,66 +35,132 @@ const ProfileImage = () => {
 
     const form = useForm({
         defaultValues: {
-            image: null as File | null
+            profileImageUrl: ''
         },
         validators: {
             onChange: profileImageSchema
         },
         onSubmit: async ({ value }) => {
-            console.log(value.image)
+            console.log(value.profileImageUrl)
+            await updateUser({
+                image: value.profileImageUrl,
+            }, {
+                onError: (error) => {
+                    toast.error(error.error.message)
+                },
+                onSuccess: () => {
+                    toast.success('Profile Image updated')
+                    form.reset()
+                    
+                    queryClient.invalidateQueries({
+                        queryKey: ['session']
+                    })
+                }
+            })
         }
+    })
+
+    const { handleChange, state: { value } } = useField({
+        form,
+        name: 'profileImageUrl'
+    })
+
+    const { startUpload, isUploading } = useUploadThing('imageUploader', {
+        onClientUploadComplete: (data) => {
+            handleChange(data[0]?.ufsUrl ?? '')
+        }
+    })
+
+    const { getRootProps, getInputProps, isDragActive } = useDropzone({
+        onDrop: (acceptedFile) => {
+            toast.promise(startUpload(acceptedFile), {
+                loading: 'Uploading...',
+                success: 'Uploaded successfully',
+                error: 'Upload failed'
+            })
+        },
+        maxFiles: 1,
     })
 
     if (isFetchSessionPending) {
         return <div>Loading...</div>
     }
 
+    if (!session?.data?.user) {
+        return 
+    }
+
+    const user = session?.data?.user
+
     return (
-        <div className='flex items-center gap-10'>
-            <Avatar className='size-24'>
-                <AvatarImage src={data?.user?.image ?? ''} />
-                <AvatarFallback>
-                    {data?.user?.name?.charAt(0)}
-                </AvatarFallback>
-            </Avatar>
+        <div className=''>
             <form onSubmit={(e) => {
                 e.preventDefault()
                 e.stopPropagation()
 
                 form.handleSubmit()
             }}>
-                <Input
-                    type='file'
-                    accept='image/*'
-                    onChange={(e) => {
-                        form.setFieldValue('image', e.target.files?.[0] ?? null)
-                        form.state.errors = []
-                    }}
-                />
-                {form.getAllErrors().form.errors.map((err, i) => {
-                    const error = Object.values(err ?? {})[0]?.[0]?.message
-
-
-                    return (
-                        <div key={i} className="text-red-500 text-sm mt-2">
-                            {error}
+                <div className='flex items-center gap-10'>
+                    <Avatar className='size-24'>
+                        <AvatarImage src={user?.image ?? ''} />
+                        <AvatarFallback>
+                            {user.name.charAt(0)}
+                        </AvatarFallback>
+                    </Avatar>
+                    {value ? (
+                        <div className='flex items-center gap-10 text-sm'>
+                            Changes to
+                            <Avatar className='size-24'>
+                                <AvatarImage src={value} />
+                                <AvatarFallback>
+                                    {user.name.charAt(0)}
+                                </AvatarFallback>
+                            </Avatar>
+                        </div>
+                    ) : (
+                        <div className='w-full' {...getRootProps()}>
+                            <Input {...getInputProps()} />
+                            <div className='cursor-pointer border-2 border-dashed border-gray-300 rounded-md p-4 w-full flex items-center justify-center text-sm h-24'>
+                                {isUploading ? (
+                                    <Loader2 size={16} className='animate-spin' />
+                                ) : isDragActive ? (
+                                    <p className='animate-pulse'>Drop the files here ...</p>
+                                ) : (
+                                    <p>Drag 'n' drop some files here, or click to select files</p>
+                                )}
+                            </div>
                         </div>
                     )
-                })}
+                    }
+                    {
+                        form.getAllErrors().form.errors[0]?.profileImageUrl?.map((error, index) => (
+                            <div key={`${error.path}-${index}`} className='text-red-500 text-sm mt-2'>
+                                {error.message}
+                            </div>
+                        ))
+                    }
+                </div>
                 <form.Subscribe
                     selector={(state) => [state.canSubmit, state.isSubmitting]}
                     children={([canSubmit, isSubmitting]) => (
-                        <Button
-                            className='mt-6'
-                            type="submit"
-                            disabled={!canSubmit || isSubmitting}
-                        >
-                            {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : "Edit Profile Image"}
-                        </Button>
+                        <div className='mt-5 flex items-end gap-3'>
+                            <Button
+                                className='mt-6'
+                                type="submit"
+                                disabled={!canSubmit || isSubmitting || isUploading}
+                            >
+                                {isSubmitting ? <Loader2 size={16} className="animate-spin" /> : "Edit Profile Image"}
+                            </Button>
+                            <Button variant='outline' type='button' onClick={() => {
+                                form.setFieldValue('profileImageUrl', '')
+                            }}>
+                                Cancel
+                            </Button>
+                        </div>
                     )}
                 />
-            </form>
-        </div>
+            </form >
+        </div >
     )
 }
 

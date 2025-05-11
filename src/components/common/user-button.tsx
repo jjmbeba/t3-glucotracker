@@ -8,23 +8,34 @@ import { signOut } from '~/lib/auth-client'
 import { cn } from '~/lib/utils'
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar'
 import { Button, buttonVariants } from '../ui/button'
-type Session = Awaited<ReturnType<typeof auth.api.getSession>>
+import { useQuery } from '@tanstack/react-query'
+import { getSession } from '~/lib/auth-client'
 
-const UserButton = ({ session, className, showLogout = false }: { session: Session, className?: string, showLogout?: boolean }) => {
+const UserButton = ({ className, showLogout = false }: { className?: string, showLogout?: boolean }) => {
     const router = useRouter()
-    const initials = useMemo(() => {
-        if (!session?.user.name) return ''
 
-        return session.user.name.split(' ').map(name => name[0]).join('')
-    }, [session?.user.name])
+    const { data: session } = useQuery({
+        queryKey: ['session'],
+        queryFn: () => {
+            return getSession()
+        }
+    })
+
+    const user = session?.data?.user
+
+    const initials = useMemo(() => {
+        if (!user?.name) return ''
+
+        return user.name.split(' ').map(name => name[0]).join('')
+    }, [user?.name])
 
     return (
         <div role="navigation" aria-label="User menu">
-            {session?.user.name ? (
+            {user?.name ? (
                 <div className='flex gap-4'>
                     <Link href='/settings/profile'>
-                        <Avatar aria-label={`Profile picture of ${session?.user.name}`}>
-                            <AvatarImage src={session?.user.image ?? undefined} alt={session?.user.name ?? 'Profile picture'} />
+                        <Avatar aria-label={`Profile picture of ${user.name}`}>
+                            <AvatarImage src={user.image ?? undefined} alt={user.name ?? 'Profile picture'} />
                             <AvatarFallback>
                                 {initials}
                             </AvatarFallback>
