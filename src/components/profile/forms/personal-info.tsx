@@ -1,6 +1,7 @@
 "use client"
 
 import { useForm } from '@tanstack/react-form'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { z } from 'zod'
@@ -8,7 +9,7 @@ import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import { Skeleton } from '~/components/ui/skeleton'
-import { updateUser, useSession } from '~/lib/auth-client'
+import { getSession, updateUser } from '~/lib/auth-client'
 
 const personalInfoSchema = z.object({
     email: z.string().email(),
@@ -36,16 +37,24 @@ const PersonalInformationSkeleton = () => {
 }
 
 const PersonalInformation = () => {
-    const { data, isPending: isFetchSessionPending, error, refetch } = useSession()
+    const queryClient = useQueryClient()
+    const { data, isPending: isFetchSessionPending, error } = useQuery({
+        queryKey: ['session'],
+        queryFn: () => {
+            return getSession()
+        }
+    })
 
     if (error) {
         toast.error(error.message)
     }
 
+    const user = data?.data?.user
+
     const form = useForm({
         defaultValues: {
-            email: data?.user?.email ?? '',
-            name: data?.user?.name ?? ''
+            email: user?.email ?? '',
+            name: user?.name ?? ''
         },
         validators: {
             onBlur: personalInfoSchema
@@ -59,7 +68,7 @@ const PersonalInformation = () => {
                 },
                 onSuccess: () => {
                     toast.success('Personal information updated')
-                    refetch()
+                    queryClient.invalidateQueries({ queryKey: ['session'] })
                 }
             })
         }
