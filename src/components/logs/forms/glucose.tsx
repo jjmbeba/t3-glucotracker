@@ -163,7 +163,7 @@ const GlucoseForm = () => {
                                                 <Button
                                                     variant="outline"
                                                     className={cn(
-                                                        "w-full md:w-[280px] justify-start text-left font-normal",
+                                                        "w-full justify-start text-left font-normal",
                                                         !field.state.value && "text-muted-foreground"
                                                     )}
                                                 >
@@ -234,7 +234,7 @@ const GlucoseForm = () => {
                         children={([canSubmit, isSubmitting]) => (
                             <div className='flex gap-2'>
                                 <Button type='submit' disabled={!canSubmit || isSubmitting || isGlucoseLogPending}>
-                                    {isSubmitting || isGlucoseLogPending ? <Loader2 className='size-4 animate-spin' /> : 'Submit'}
+                                    {isSubmitting || isGlucoseLogPending ? <Loader2 className='size-4 animate-spin' /> : 'Upload log'}
                                 </Button>
                                 <Button type='button' variant={'outline'} onClick={() => {
                                     form.reset()
