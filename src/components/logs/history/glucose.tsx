@@ -1,33 +1,18 @@
 "use client"
 
-import { CartesianGrid, Line, LineChart, XAxis } from "recharts"
 import { api } from '~/trpc/react'
 
 import dayjs from "dayjs"
-import { FilterIcon, XIcon } from "lucide-react"
-import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
-import { Badge } from "~/components/ui/badge"
-import { Button, buttonVariants } from "~/components/ui/button"
+import { GlucoseDistributionChart } from "~/components/charts/glucose/glucose-distribution"
+import { GlucoseHistoryChart } from "~/components/charts/glucose/glucose-history"
 import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle
-} from "~/components/ui/card"
-import {
-    type ChartConfig,
-    ChartContainer,
-    ChartTooltip,
-    ChartTooltipContent,
+    type ChartConfig
 } from "~/components/ui/chart"
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "~/components/ui/sheet"
-import {
-    Tooltip,
-    TooltipContent,
-    TooltipTrigger,
-} from "~/components/ui/tooltip"
 import { cn } from "~/lib/utils"
+import FilterLabels from "../common/filter-labels"
+import FilterGlucoseLogs from "../common/filter-logs"
 
 const chartConfig = {
     glucose: {
@@ -38,19 +23,10 @@ const chartConfig = {
 
 
 const GlucoseHistory = ({ timePeriod }: { timePeriod: string }) => {
-    return (
-        <div className="grid grid-cols-2 gap-4 mt-4">
-            <GlucoseHistoryChart timePeriod={timePeriod} />
-
-        </div>
-    )
-}
-
-export default GlucoseHistory
-
-export const GlucoseHistoryChart = ({ timePeriod }: { timePeriod: string }) => {
     const { data, isLoading: isGlucoseLogsLoading } = api.glucose.getLogs.useQuery()
+
     const [glucoseLogs, setGlucoseLogs] = useState(data)
+    const pathname = usePathname()
 
     useEffect(() => {
         if (timePeriod === "lastWeek") {
@@ -62,107 +38,23 @@ export const GlucoseHistoryChart = ({ timePeriod }: { timePeriod: string }) => {
         }
     }, [timePeriod])
 
+    const timePeriodLabel = timePeriod === "lastWeek" ? "Last week" : timePeriod === "lastMonth" ? "Last month" : null
+
     return (
-        <div>
-            <div className="flex items-center gap-2 flex-wrap">
-                <Badge variant="outline">
-                    <p>
-                        Last week
-                    </p>
-                    <Button variant="outline" className="size-1">
-                        <XIcon className="size-3" />
-                    </Button>
-                </Badge>
+        <div className="flex flex-col">
+            <div className={cn("flex items-center", {
+                "justify-end": !!!timePeriodLabel,
+                "justify-between": !!timePeriodLabel,
+            })}>
+                {timePeriodLabel && <FilterLabels timePeriodLabel={timePeriodLabel} pathname={pathname} />}
+                <FilterGlucoseLogs tooltipContent="Filter glucose levels" />
             </div>
-            <Card className="mt-2">
-                <CardHeader>
-                    <CardTitle className="flex items-center justify-between">
-                        <span>
-                            Glucose levels
-                        </span>
-                        <Sheet>
-                            <Tooltip>
-                                <SheetTrigger asChild>
-                                    <TooltipTrigger asChild>
-                                        <Button variant="outline" size="icon">
-                                            <FilterIcon className="size-4" />
-                                        </Button>
-                                    </TooltipTrigger>
-                                </SheetTrigger>
-                                <TooltipContent>
-                                    <p>Filter glucose levels</p>
-                                </TooltipContent>
-                            </Tooltip>
-                            <SheetContent>
-                                <SheetHeader>
-                                    <SheetTitle>Filter glucose levels</SheetTitle>
-                                    <SheetDescription>
-                                        <div>
-                                            <p className="text-sm font-medium">
-                                                Time period
-                                            </p>
-                                            <div className="grid grid-cols-3 gap-2 mt-2">
-                                                <Link href={`/logs/glucose`} className={cn(buttonVariants({
-                                                    variant: "outline",
-                                                    size: 'sm'
-                                                }), "size-full")}>
-                                                    <p>
-                                                        All
-                                                    </p>
-                                                </Link>
-                                                <Link href={`/logs/glucose?timePeriod=lastWeek`} className={cn(buttonVariants({
-                                                    variant: "outline",
-                                                    size: 'sm'
-                                                }), "size-full")}>
-                                                    <p>Last week</p>
-                                                </Link>
-                                                <Link href={`/logs/glucose?timePeriod=lastMonth`} className={cn(buttonVariants({
-                                                    variant: "outline",
-                                                    size: 'sm'
-                                                }), "size-full")}>
-                                                    <p>Last month</p>
-                                                </Link>
-                                            </div>
-                                        </div>
-                                    </SheetDescription>
-                                </SheetHeader>
-                            </SheetContent>
-                        </Sheet>
-                    </CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <ChartContainer config={chartConfig}>
-                        <LineChart
-                            accessibilityLayer
-                            data={glucoseLogs}
-                            margin={{
-                                left: 12,
-                                right: 12,
-                            }}
-                        >
-                            <CartesianGrid vertical={false} />
-                            <XAxis
-                                dataKey="date"
-                                tickLine={false}
-                                axisLine={false}
-                                tickMargin={8}
-                                tickFormatter={(value) => dayjs(value).format("DD MMM")}
-                            />
-                            <ChartTooltip
-                                cursor={false}
-                                content={<ChartTooltipContent hideLabel />}
-                            />
-                            <Line
-                                dataKey="glucose"
-                                type="natural"
-                                stroke="var(--chart-5)"
-                                strokeWidth={2}
-                                dot={false}
-                            />
-                        </LineChart>
-                    </ChartContainer>
-                </CardContent>
-            </Card >
+            <div className="grid grid-cols-2 gap-4 mt-4">
+                <GlucoseHistoryChart glucoseLogs={glucoseLogs ?? []} chartConfig={chartConfig} />
+                <GlucoseDistributionChart glucoseLogs={glucoseLogs ?? []} chartConfig={chartConfig} />
+            </div>
         </div>
     )
 }
+
+export default GlucoseHistory

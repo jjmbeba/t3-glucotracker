@@ -18,3 +18,8 @@ export function capitalize(str: string) {
   return str.charAt(0).toUpperCase() + str.slice(1)
 }
 
+export function removeSearchParam(pathname: string, param: string) {
+  const urlObj = new URL(`${process.env.NEXT_PUBLIC_APP_URL}${pathname}`)
+  urlObj.searchParams.delete(param)
+  return urlObj.pathname + urlObj.search
+}

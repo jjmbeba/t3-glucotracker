@@ -33,10 +33,11 @@ export type RouterInputs = inferRouterInputs<AppRouter>;
 
 /**
  * Inference helper for outputs.
- *
- * @example type HelloOutput = RouterOutputs['example']['hello']
- */
+*
+* @example type HelloOutput = RouterOutputs['example']['hello']
+*/
 export type RouterOutputs = inferRouterOutputs<AppRouter>;
+export type GetGlucoseLogsOutput = RouterOutputs['glucose']['getLogs']
 
 export function TRPCReactProvider(props: { children: React.ReactNode }) {
 	const queryClient = getQueryClient();
