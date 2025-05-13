@@ -32,7 +32,7 @@ const GlucoseHistorySkeleton = () => {
                 <Skeleton className="h-8 w-8" />
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
-                <div className="lg:col-span-2">
+                <div className="lg:col-span-1">
                     <div className="mt-2">
                         <Skeleton className="h-8 w-48 mb-4" />
                         <Skeleton className="h-[300px] w-full" />
@@ -75,6 +75,7 @@ const GlucoseHistory = ({ timePeriod }: { timePeriod: string }) => {
 
     if (error) {
         toast.error("Error fetching glucose logs")
+        console.error(error)
     }
 
     const timePeriodLabel = timePeriod === "lastWeek" ? "Last week" : timePeriod === "lastMonth" ? "Last month" : null

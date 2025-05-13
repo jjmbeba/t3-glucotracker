@@ -8,8 +8,9 @@ import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Label } from "~/components/ui/label";
-import { signUp, useSession } from "~/lib/auth-client";
+import { signUp } from "~/lib/auth-client";
 import { signUpSchema } from "~/schemas/auth";
+import { Checkbox } from "~/components/ui/checkbox";
 
 const SignUpForm = () => {
     const router = useRouter()
@@ -21,6 +22,7 @@ const SignUpForm = () => {
             email: "",
             password: "",
             confirmPassword: "",
+            rememberMe: false
         }
     })
 
@@ -36,9 +38,10 @@ const SignUpForm = () => {
                 email,
                 password,
                 name: `${firstName} ${lastName}`
-            }, {
+            }, {p
                 onError: (error) => {
                     toast.error(error.error.message)
+                    console.error(error)
                 },
                 onSuccess: (data) => {
                     toast.success("Sign up successful")
@@ -47,6 +50,8 @@ const SignUpForm = () => {
             })
         },
     })
+
+    console.log(form.state.errors)
 
     return (
         <form onSubmit={(e) => {
@@ -168,6 +173,21 @@ const SignUpForm = () => {
                                     {error?.message}
                                 </div>
                             ))}
+                        </>
+                    )}
+                />
+            </div>
+            <div className="flex items-center gap-2">
+                <form.Field
+                    name="rememberMe"
+                    children={(field) => (
+                        <>
+                            <Checkbox
+                                id="remember"
+                                checked={field.state.value}
+                                onCheckedChange={(checked) => field.handleChange(checked === true)}
+                            />
+                            <Label htmlFor="remember">Remember me</Label>
                         </>
                     )}
                 />
