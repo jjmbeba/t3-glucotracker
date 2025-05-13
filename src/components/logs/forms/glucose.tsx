@@ -163,7 +163,7 @@ const GlucoseForm = () => {
                                                 <Button
                                                     variant="outline"
                                                     className={cn(
-                                                        "w-full md:w-[280px] justify-start text-left font-normal",
+                                                        "w-full justify-start text-left font-normal",
                                                         !field.state.value && "text-muted-foreground"
                                                     )}
                                                 >
@@ -185,7 +185,11 @@ const GlucoseForm = () => {
                                                 />
                                                 <div className="p-3 border-t border-border">
                                                     <TimePicker
-                                                        setDate={(date) => field.handleChange(toISOStringWithTimezone(date ?? new Date()))}
+                                                        setDate={(date) => {
+                                                            if(!date) return;
+
+                                                            field.handleChange(toISOStringWithTimezone(date))
+                                                        }}
                                                         date={new Date(field.state.value)}
                                                     />
                                                 </div>
@@ -230,7 +234,7 @@ const GlucoseForm = () => {
                         children={([canSubmit, isSubmitting]) => (
                             <div className='flex gap-2'>
                                 <Button type='submit' disabled={!canSubmit || isSubmitting || isGlucoseLogPending}>
-                                    {isSubmitting || isGlucoseLogPending ? <Loader2 className='size-4 animate-spin' /> : 'Submit'}
+                                    {isSubmitting || isGlucoseLogPending ? <Loader2 className='size-4 animate-spin' /> : 'Upload log'}
                                 </Button>
                                 <Button type='button' variant={'outline'} onClick={() => {
                                     form.reset()
