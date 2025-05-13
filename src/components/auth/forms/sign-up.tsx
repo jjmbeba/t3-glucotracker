@@ -38,10 +38,9 @@ const SignUpForm = () => {
                 email,
                 password,
                 name: `${firstName} ${lastName}`
-            }, {p
+            }, {
                 onError: (error) => {
                     toast.error(error.error.message)
-                    console.error(error)
                 },
                 onSuccess: (data) => {
                     toast.success("Sign up successful")
