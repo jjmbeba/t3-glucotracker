@@ -13,6 +13,7 @@ import {
 import { cn } from "~/lib/utils"
 import FilterLabels from "../common/filter-labels"
 import FilterGlucoseLogs from "../common/filter-logs"
+import GlucosePieChart from '~/components/charts/glucose/glucose-pie'
 
 const chartConfig = {
     glucose: {
@@ -52,6 +53,7 @@ const GlucoseHistory = ({ timePeriod }: { timePeriod: string }) => {
             <div className="grid grid-cols-2 gap-4 mt-4">
                 <GlucoseHistoryChart glucoseLogs={glucoseLogs ?? []} chartConfig={chartConfig} />
                 <GlucoseDistributionChart glucoseLogs={glucoseLogs ?? []} chartConfig={chartConfig} />
+                <GlucosePieChart glucoseLogs={glucoseLogs ?? []} />
             </div>
         </div>
     )

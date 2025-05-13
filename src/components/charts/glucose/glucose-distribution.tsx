@@ -1,3 +1,5 @@
+'use client'
+
 import { ChartTooltipContent, ChartTooltip, type ChartConfig, } from "~/components/ui/chart"
 import { CartesianGrid, Scatter, ScatterChart, XAxis, YAxis } from "recharts"
 import { ChartContainer } from "~/components/ui/chart"

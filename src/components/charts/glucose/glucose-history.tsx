@@ -1,3 +1,5 @@
+'use client'
+
 import dayjs from "dayjs"
 import { CartesianGrid, Line, LineChart, XAxis } from "recharts"
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
