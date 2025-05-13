@@ -39,7 +39,7 @@ const SignInForm = () => {
                 },
                 onSuccess: (data) => {
                     toast.success("Sign in successful")
-                    router.push('/')
+                    router.push('/dashboard')
                 }
             })
         },
