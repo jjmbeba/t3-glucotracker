@@ -95,7 +95,7 @@ const GlucosePieChart = ({ glucoseLogs }: Props) => {
                         >
                             {chartData.map((entry, index) => (
                                 <Cell 
-                                    key={`cell-${index}`} 
+                                    key={`cell-${entry.name}`} 
                                     fill={COLORS[entry.name as keyof typeof COLORS]} 
                                 />
                             ))}
