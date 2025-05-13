@@ -39,7 +39,7 @@ export const glucoseRouter = createTRPCRouter({
                 id: glucoseLog.id,
                 glucose: glucoseLog.glucose,
                 date: glucoseLog.date,
-            }).from(glucoseLog).where(eq(glucoseLog.userId, auth.user.id)).orderBy(glucoseLog.date)
+            }).from(glucoseLog).where(eq(glucoseLog.userId, auth.user.id)).orderBy(glucoseLog.date).limit(100)
         } catch (error) {
             if (error instanceof TRPCError) throw error;
 

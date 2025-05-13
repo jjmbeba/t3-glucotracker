@@ -18,6 +18,7 @@ import {
     ChartTooltipContent,
     type ChartConfig
 } from "~/components/ui/chart"
+import dayjs from 'dayjs'
 
 type Props = {
     glucoseLogs: GetGlucoseLogsOutput
@@ -58,13 +59,16 @@ const GlucosePieChart = ({ glucoseLogs }: Props) => {
                 <CardTitle>
                     Glucose high & low distribution
                 </CardTitle>
-                <CardDescription>January - June 2024</CardDescription>
+                <CardDescription>
+                    {glucoseLogs.length > 0 ? `${dayjs(glucoseLogs?.[0]?.date).format("MMMM YYYY")} to ${dayjs(glucoseLogs?.[glucoseLogs.length - 1]?.date).format("MMMM YYYY")}` : "No glucose logs found"}
+                </CardDescription>
             </CardHeader>
             <CardContent className="flex-1 pb-0">
-                <ChartContainer
-                    config={chartConfig} 
-                    className="mx-auto aspect-square max-h-[250px]"
-                >
+                {glucoseLogs.length > 0 ? (
+                    <ChartContainer
+                        config={chartConfig}
+                        className="mx-auto aspect-square max-h-[250px]"
+                    >
                     <PieChart>
                         <ChartTooltip
                             cursor={false}
@@ -72,7 +76,12 @@ const GlucosePieChart = ({ glucoseLogs }: Props) => {
                         />
                         <Pie data={chartData} dataKey="value" nameKey="name" />
                     </PieChart>
-                </ChartContainer>
+                    </ChartContainer>
+                ) : (
+                    <div className="flex items-center justify-center h-full">
+                        <p className="text-sm text-muted-foreground">No glucose logs found</p>
+                    </div>
+                )}
             </CardContent>
         </Card>
     )

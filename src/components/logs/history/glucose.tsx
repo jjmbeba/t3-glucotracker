@@ -68,7 +68,7 @@ const GlucoseHistory = ({ timePeriod }: { timePeriod: string }) => {
         } else {
             setGlucoseLogs(data)
         }
-    }, [timePeriod])
+    }, [timePeriod, data])
 
     const timePeriodLabel = timePeriod === "lastWeek" ? "Last week" : timePeriod === "lastMonth" ? "Last month" : null
 
