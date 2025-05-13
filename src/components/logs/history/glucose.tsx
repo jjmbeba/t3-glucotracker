@@ -1,6 +1,6 @@
 "use client"
 
-import { api } from '~/trpc/react'
+import { api, type GetGlucoseLogsOutput } from '~/trpc/react'
 
 import dayjs from "dayjs"
 import { usePathname } from "next/navigation"
@@ -15,6 +15,7 @@ import FilterLabels from "../common/filter-labels"
 import FilterGlucoseLogs from "../common/filter-logs"
 import GlucosePieChart from '~/components/charts/glucose/glucose-pie'
 import { Skeleton } from "~/components/ui/skeleton"
+import { toast } from 'sonner'
 
 const chartConfig = {
     glucose: {
@@ -55,25 +56,43 @@ const GlucoseHistorySkeleton = () => {
 }
 
 const GlucoseHistory = ({ timePeriod }: { timePeriod: string }) => {
-    const { data, isLoading: isGlucoseLogsLoading } = api.glucose.getLogs.useQuery()
+    const { data, isLoading: isGlucoseLogsLoading, error } = api.glucose.getLogs.useQuery()
 
-    const [glucoseLogs, setGlucoseLogs] = useState(data)
+    const [glucoseLogs, setGlucoseLogs] = useState<GetGlucoseLogsOutput>([])
     const pathname = usePathname()
 
     useEffect(() => {
+        if (!data) return
+
         if (timePeriod === "lastWeek") {
-            setGlucoseLogs(data?.filter((log) => dayjs(log.date).isSame(dayjs(), "week")))
+            setGlucoseLogs(data.filter((log) => dayjs(log.date).isSame(dayjs(), "week")))
         } else if (timePeriod === "lastMonth") {
-            setGlucoseLogs(data?.filter((log) => dayjs(log.date).isSame(dayjs(), "month")))
+            setGlucoseLogs(data.filter((log) => dayjs(log.date).isSame(dayjs(), "month")))
         } else {
             setGlucoseLogs(data)
         }
     }, [timePeriod, data])
 
+    if (error) {
+        toast.error("Error fetching glucose logs")
+    }
+
     const timePeriodLabel = timePeriod === "lastWeek" ? "Last week" : timePeriod === "lastMonth" ? "Last month" : null
 
     if (isGlucoseLogsLoading) {
         return <GlucoseHistorySkeleton />
+    }
+
+    if (glucoseLogs.length === 0) {
+        return (
+            <div className="flex flex-col">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                    <p className="text-sm text-muted-foreground">
+                        Start tracking your glucose levels to see them here.
+                    </p>
+                </div>
+            </div>
+        )
     }
 
     return (
