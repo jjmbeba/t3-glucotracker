@@ -44,7 +44,7 @@ const SignUpForm = () => {
                 },
                 onSuccess: (data) => {
                     toast.success("Sign up successful")
-                    router.push('/')
+                    router.push('/dashboard')
                 }
             })
         },

@@ -86,7 +86,7 @@ const GlucoseHistory = ({ timePeriod }: { timePeriod: string }) => {
 
     if (glucoseLogs.length === 0) {
         return (
-            <div className="flex flex-col">
+            <div className="flex flex-col min-h-[calc(100vh-10rem)] justify-center items-center">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
                     <p className="text-sm text-muted-foreground">
                         Start tracking your glucose levels to see them here.
