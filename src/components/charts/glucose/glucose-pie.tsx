@@ -2,7 +2,7 @@
 
 import type { GetGlucoseLogsOutput } from '~/trpc/react'
 
-import { Pie, PieChart } from "recharts"
+import { Cell, Pie, PieChart } from "recharts"
 
 import {
     Card,
@@ -29,12 +29,16 @@ const chartConfig = {
         label: "Value"
     },
     high: {
-        color: "hsl(var(--chart-1))",
+        color: "var(--chart-5)",
         label: "High"
     },
     low: {
-        color: "hsl(var(--chart-2))",
+        color: "var(--chart-2)",
         label: "Low"
+    },
+    normal: {
+        color: "var(--chart-3)",
+        label: "Normal"
     }
 } satisfies ChartConfig
 
@@ -44,14 +48,23 @@ const GlucosePieChart = ({ glucoseLogs }: Props) => {
             acc.high += 1
         } else if (log.glucose < 72) {
             acc.low += 1
+        } else {
+            acc.normal += 1
         }
         return acc
-    }, { high: 0, low: 0 })
+    }, { high: 0, low: 0, normal: 0 })
 
     const chartData = [
         { name: "high", value: highVLows.high },
         { name: "low", value: highVLows.low },
+        { name: "normal", value: highVLows.normal },
     ]
+
+    const COLORS = {
+        high: chartConfig.high.color,
+        low: chartConfig.low.color,
+        normal: chartConfig.normal.color
+    }
 
     return (
         <Card className="flex flex-col">
@@ -74,7 +87,19 @@ const GlucosePieChart = ({ glucoseLogs }: Props) => {
                             cursor={false}
                             content={<ChartTooltipContent hideLabel />}
                         />
-                        <Pie data={chartData} dataKey="value" nameKey="name" />
+                        <Pie 
+                            data={chartData} 
+                            dataKey="value" 
+                            nameKey="name"
+                            stroke="none"
+                        >
+                            {chartData.map((entry, index) => (
+                                <Cell 
+                                    key={`cell-${index}`} 
+                                    fill={COLORS[entry.name as keyof typeof COLORS]} 
+                                />
+                            ))}
+                        </Pie>
                     </PieChart>
                     </ChartContainer>
                 ) : (
