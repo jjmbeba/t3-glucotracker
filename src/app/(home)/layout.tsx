@@ -9,7 +9,7 @@ import {
   SidebarTrigger,
 } from "~/components/ui/sidebar"
 
-const Layout =  ({ children }: { children: React.ReactNode }) => {
+const Layout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div>
       <SidebarProvider>

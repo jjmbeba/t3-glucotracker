@@ -3,8 +3,15 @@ import GlucoseHistory from '~/components/logs/history/glucose'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { api, HydrateClient } from '~/trpc/server'
 
-const GlucoseLogsPage = () => {
+type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>
+
+const GlucoseLogsPage = async (props : {
+    searchParams: SearchParams
+}) => {
     void api.glucose.getLogs.prefetch()
+
+    const searchParams = await props.searchParams
+    const timePeriod = searchParams.timePeriod
 
     return (
         <HydrateClient>
@@ -12,13 +19,13 @@ const GlucoseLogsPage = () => {
                 <h2 className='page-title'>
                     Glucose Logs
                 </h2>
-                <Tabs defaultValue='upload'>
+                <Tabs defaultValue='history'>
                     <TabsList>
                         <TabsTrigger value='history'>History</TabsTrigger>
                         <TabsTrigger value='upload'>Upload</TabsTrigger>
                     </TabsList>
                     <TabsContent value='history'>
-                        <GlucoseHistory />
+                        <GlucoseHistory timePeriod={timePeriod as string ?? ''} />
                     </TabsContent>
                     <TabsContent value='upload'>
                         <GlucoseForm />
