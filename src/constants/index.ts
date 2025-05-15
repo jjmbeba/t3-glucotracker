@@ -7,3 +7,6 @@ export const oralForms = {
     capsule: 'capsule(s)',
     'oral-solution': 'mL'
 };
+
+
+export const doseUnits = ['tablet(s)', 'capsule(s)', 'mL', 'unit(s)']
