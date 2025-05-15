@@ -1,4 +1,5 @@
-export const medicationForms = ['tablet', 'capsule', 'injection-vial', 'injection-pen', 'injection-pump-basal', 'injection-pump-bolus', 'oral-solution']
+export const medicationForms = ['tablet', 'capsule', 'injection-vial', 'injection-pen', 'injection-pump-basal', 'injection-pump-bolus', 'oral-solution'] as const;
+export type MedicationForm = typeof medicationForms[number];
 
 export const insulinForms = ['injection-vial', 'injection-pen', 'injection-pump-basal', 'injection-pump-bolus'];
 export const oralForms = {

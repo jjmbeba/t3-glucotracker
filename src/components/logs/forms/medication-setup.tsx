@@ -10,22 +10,26 @@ import { SelectContent, SelectTrigger } from '~/components/ui/select'
 import { SelectItem, SelectValue } from '~/components/ui/select'
 import { Select } from '~/components/ui/select'
 import { Textarea } from '~/components/ui/textarea'
-import { insulinForms, medicationForms, oralForms } from '~/constants'
+import { insulinForms, medicationForms, oralForms, type MedicationForm } from '~/constants'
 import { capitalize } from '~/lib/utils'
-
-const medicationSetupSchema = z.object({
-    name: z.string().min(1, {
-        message: "Medication name is required"
-    }),
-    medication_form: z.enum(medicationForms as [string, ...string[]], {
-        message: 'Select a medication form'
-    }),
-    strength: z.string(),
-    default_dose_units: z.number(),
-    notes: z.string()
-})
+import { medicationSetupSchema } from '~/schemas/medication'
+import { api } from '~/trpc/react'
+import { toast } from "sonner"
+import { Loader2 } from 'lucide-react'
 
 const MedicationSetup = () => {
+    const { mutate: createMedication, isPending } = api.medication.setup.useMutation({
+        onSuccess: (data) => {
+            if (data?.success) {
+                toast.success(data.message)
+                form.reset()
+            }
+        },
+        onError: (error) => {
+            toast.error(error.message)
+        }
+    })
+
     const form = useForm({
         defaultValues: {
             name: "",
@@ -38,7 +42,10 @@ const MedicationSetup = () => {
             onChange: medicationSetupSchema
         },
         onSubmit: ({ value }) => {
-            console.log(value)
+            createMedication({
+                ...value,
+                medication_form: value.medication_form as MedicationForm
+            })
         }
     })
 
@@ -147,8 +154,10 @@ const MedicationSetup = () => {
                                         disabled={medication_form === ''}
                                         onChange={(e) => field.handleChange(Number(e.target.value))}
                                     />
-                                   {medication_form !== '' ? <span className='absolute right-1/6 top-1/2 -translate-y-4 text-xs text-muted-foreground'>
-                                        {insulinForms.includes(medication_form) ? 'units' : oralForms[medication_form as keyof typeof oralForms]}
+                                    {medication_form !== '' ? <span className='absolute right-1/6 top-1/2 -translate-y-4 text-xs text-muted-foreground'>
+                                        {insulinForms.includes(medication_form)
+                                            ? 'units'
+                                            : oralForms[medication_form as keyof typeof oralForms] || ''}
                                     </span> : null}
                                     {field.state.meta.errors.map((error, i) => (
                                         <div key={i} className="text-red-500 text-sm">
@@ -191,8 +200,8 @@ const MedicationSetup = () => {
                     <form.Subscribe
                         selector={(state) => [state.canSubmit, state.isSubmitting]}
                         children={([canSubmit, isSubmitting]) => (
-                            <Button type="submit" disabled={!canSubmit || isSubmitting}>
-                                {isSubmitting ? "Submitting..." : "Submit"}
+                            <Button type="submit" disabled={!canSubmit || isSubmitting || isPending}>
+                                {isSubmitting || isPending ? <Loader2 className='w-4 h-4 animate-spin' /> : "Submit"}
                             </Button>
                         )}
                     />

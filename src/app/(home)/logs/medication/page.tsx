@@ -21,17 +21,17 @@ const MedicationPage = () => {
                 </TabsList>
                 <TabsContent value="history">
                     {/* <MedicationHistory /> */}
-                    History
+                    Medication history will be displayed here.
                 </TabsContent>
                 <TabsContent value="upload">
                     {/* <MedicationForm /> */}
-                    Upload
+                    Medication upload form will be available here.
                 </TabsContent>
                 <TabsContent value="setup">
                     <MedicationSetup />
                 </TabsContent>
             </Tabs>
-        </main>
+        </main >
     )
 }
 

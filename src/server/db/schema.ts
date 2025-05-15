@@ -93,3 +93,17 @@ export const glucoseLog = createTable("glucose_log", (d) => ({
 	updatedAt: d.timestamp({ withTimezone: true }).$onUpdate(() => new Date()),
 }))
 
+export const medication = createTable("medication", (d) => ({
+	id: d.integer('id').primaryKey().generatedByDefaultAsIdentity(),
+	userId: d.text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+	name: d.text('name').notNull(),
+	medication_form: d.text('medication_form').notNull(),
+	strength: d.text('strength'),
+	default_dose_units: d.integer('default_dose_units'),
+	notes: d.text('notes'),
+	createdAt: d
+		.timestamp({ withTimezone: true })
+		.default(sql`CURRENT_TIMESTAMP`),
+	updatedAt: d.timestamp({ withTimezone: true }).$onUpdate(() => new Date()),
+}))
+

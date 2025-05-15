@@ -16,7 +16,7 @@ const SidebarLink = ({ item }: Props) => {
     const pathname = usePathname()
 
     return (
-        <SidebarMenuSubItem key={item.title}>
+        <SidebarMenuSubItem>
             <SidebarMenuSubButton asChild isActive={pathname.split('?')[0] === item.url}>
                 <Link href={item.url}>{item.title}</Link>
             </SidebarMenuSubButton>
