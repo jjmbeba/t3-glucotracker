@@ -65,7 +65,7 @@ const GlucoseForm = () => {
             }} className="grid gap-4 mt-3">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div className="grid gap-2">
-                        <Label htmlFor="glucose">Glucose</Label>
+                        <Label htmlFor="glucose">Glucose Level</Label>
                         <form.Field
                             name="glucose"
                             children={(field) => (
@@ -186,7 +186,7 @@ const GlucoseForm = () => {
                                                 <div className="p-3 border-t border-border">
                                                     <TimePicker
                                                         setDate={(date) => {
-                                                            if(!date) return;
+                                                            if (!date) return;
 
                                                             field.handleChange(toISOStringWithTimezone(date))
                                                         }}
@@ -206,7 +206,12 @@ const GlucoseForm = () => {
                         />
                     </div>
                     <div className="grid gap-2 col-span-1 md:col-span-2 lg:col-span-1">
-                        <Label htmlFor="notes">Notes</Label>
+                        <div className='flex items-center justify-between'>
+                            <Label htmlFor="notes">Notes</Label>
+                            <span className='text-xs text-muted-foreground'>
+                                Optional
+                            </span>
+                        </div>
                         <form.Field
                             name="notes"
                             children={(field) => (

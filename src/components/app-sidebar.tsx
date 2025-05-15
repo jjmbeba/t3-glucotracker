@@ -2,7 +2,6 @@ import { GalleryVerticalEnd } from "lucide-react"
 import * as React from "react"
 
 import Link from "next/link"
-import type { auth } from "~/auth"
 import {
   Sidebar,
   SidebarContent,
@@ -17,10 +16,8 @@ import {
   SidebarRail,
 } from "~/components/ui/sidebar"
 import UserButton from "./common/user-button"
+import SidebarLink from "./ui/sidebar-link"
 
-type Session = Awaited<ReturnType<typeof auth.api.getSession>>
-
-// This is sample data.
 const data = {
   navMain: [
     {
@@ -115,11 +112,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 {item.items?.length ? (
                   <SidebarMenuSub>
                     {item.items.map((item) => (
-                      <SidebarMenuSubItem key={item.title}>
-                        <SidebarMenuSubButton asChild isActive={item.isActive}>
-                          <Link href={item.url}>{item.title}</Link>
-                        </SidebarMenuSubButton>
-                      </SidebarMenuSubItem>
+                      <SidebarLink key={item.title} item={item} />
                     ))}
                   </SidebarMenuSub>
                 ) : null}

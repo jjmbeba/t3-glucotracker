@@ -24,7 +24,7 @@ const UserButton = ({ className, showLogout = false }: { className?: string, sho
     const initials = useMemo(() => {
         if (!user?.name) return ''
 
-        return user.name.split(' ').map(name => name[0]).join('')
+        return user.name.split(' ').slice(0, 2).map(name => name[0]).join('')
     }, [user?.name])
 
     if (isFetchSessionPending) {

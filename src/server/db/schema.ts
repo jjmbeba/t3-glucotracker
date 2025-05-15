@@ -93,3 +93,31 @@ export const glucoseLog = createTable("glucose_log", (d) => ({
 	updatedAt: d.timestamp({ withTimezone: true }).$onUpdate(() => new Date()),
 }))
 
+export const medication = createTable("medication", (d) => ({
+	id: d.integer('id').primaryKey().generatedByDefaultAsIdentity(),
+	userId: d.text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+	name: d.text('name').notNull(),
+	medicationForm: d.text('medication_form').notNull(),
+	strength: d.text('strength'),
+	defaultDoseUnits: d.integer('default_dose_units'),
+	notes: d.text('notes'),
+	createdAt: d
+		.timestamp({ withTimezone: true })
+		.default(sql`CURRENT_TIMESTAMP`).notNull(),
+	updatedAt: d.timestamp({ withTimezone: true }).$onUpdate(() => new Date()),
+}))
+
+export const medication_log = createTable("medication_log", (d) => ({
+	id: d.integer('id').primaryKey().generatedByDefaultAsIdentity(),
+	userId: d.text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+	medicationId: d.integer('medication_id').notNull().references(() => medication.id, { onDelete: 'cascade' }),
+	dosageAmountTaken: d.integer('dosage_amount_taken').notNull(),
+	dosageUnitTaken: d.text('dosage_unit_taken').notNull(),
+	notes: d.text('notes'),
+createdAt: d
+ 		.timestamp({ withTimezone: true })
+		.default(sql`CURRENT_TIMESTAMP`)
+		.notNull(),
+ 	updatedAt: d.timestamp({ withTimezone: true }).$onUpdate(() => new Date()),
+}))
+

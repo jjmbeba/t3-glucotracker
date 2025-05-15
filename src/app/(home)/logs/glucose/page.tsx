@@ -17,7 +17,7 @@ const GlucoseLogsPage = async (props : {
         <HydrateClient>
             <div>
                 <h2 className='page-title'>
-                    Glucose Logs
+                    Glucose
                 </h2>
                 <Tabs defaultValue='history'>
                     <TabsList>
