@@ -1,0 +1,205 @@
+'use client'
+
+import { useForm, useStore } from '@tanstack/react-form'
+import React from 'react'
+import { z } from 'zod'
+import { Button } from '~/components/ui/button'
+import { Input } from '~/components/ui/input'
+import { Label } from '~/components/ui/label'
+import { SelectContent, SelectTrigger } from '~/components/ui/select'
+import { SelectItem, SelectValue } from '~/components/ui/select'
+import { Select } from '~/components/ui/select'
+import { Textarea } from '~/components/ui/textarea'
+import { insulinForms, medicationForms, oralForms } from '~/constants'
+import { capitalize } from '~/lib/utils'
+
+const medicationSetupSchema = z.object({
+    name: z.string().min(1, {
+        message: "Medication name is required"
+    }),
+    medication_form: z.enum(medicationForms as [string, ...string[]], {
+        message: 'Select a medication form'
+    }),
+    strength: z.string(),
+    default_dose_units: z.number(),
+    notes: z.string()
+})
+
+const MedicationSetup = () => {
+    const form = useForm({
+        defaultValues: {
+            name: "",
+            medication_form: "",
+            strength: "",
+            default_dose_units: 0,
+            notes: ""
+        },
+        validators: {
+            onChange: medicationSetupSchema
+        },
+        onSubmit: ({ value }) => {
+            console.log(value)
+        }
+    })
+
+    const medication_form = useStore(form.store, (state) => state.values.medication_form)
+
+    return (
+        <div className='mt-8'>
+            <form onSubmit={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+
+                form.handleSubmit()
+            }} className="grid gap-4 mt-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="grid gap-2">
+                        <Label htmlFor="name">Medication Name</Label>
+                        <form.Field
+                            name="name"
+                            children={(field) => (
+                                <>
+                                    <Input
+                                        id="name"
+                                        placeholder="Medication Name"
+                                        value={field.state.value}
+                                        onBlur={field.handleBlur}
+                                        onChange={(e) => field.handleChange(e.target.value)}
+                                    />
+                                    {field.state.meta.errors.map((error, i) => (
+                                        <div key={i} className="text-red-500 text-sm">
+                                            {error?.message}
+                                        </div>
+                                    ))}
+                                </>
+                            )}
+                        />
+                    </div>
+                    <div className="grid gap-2">
+                        <Label htmlFor="medication_form">Medication Form</Label>
+                        <form.Field
+                            name="medication_form"
+                            children={(field) => (
+                                <>
+                                    <Select onValueChange={(e) => field.handleChange(e)} defaultValue={field.state.value}>
+                                        <SelectTrigger className='w-full'>
+                                            <SelectValue placeholder="Select a medication form" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {medicationForms.map((form, i) => (
+                                                <SelectItem key={i} value={form}>{capitalize(form)}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    {field.state.meta.errors.map((error, i) => (
+                                        <div key={i} className="text-red-500 text-sm">
+                                            {error?.message}
+                                        </div>
+                                    ))}
+                                </>
+                            )}
+                        />
+                    </div>
+                    <div className="grid gap-2">
+                        <div className='flex items-center justify-between'>
+                            <Label htmlFor="strength">Strength</Label>
+                            <span className='text-xs text-muted-foreground'>
+                                Optional
+                            </span>
+                        </div>
+                        <form.Field
+                            name="strength"
+                            children={(field) => (
+                                <>
+                                    <Input
+                                        id="strength"
+                                        placeholder="Strength e.g 100 units/mL or 500mg"
+                                        value={field.state.value}
+                                        onBlur={field.handleBlur}
+                                        onChange={(e) => field.handleChange(e.target.value)}
+                                    />
+                                    {field.state.meta.errors.map((error, i) => (
+                                        <div key={i} className="text-red-500 text-sm">
+                                            {error?.message}
+                                        </div>
+                                    ))}
+                                </>
+                            )}
+                        />
+                    </div>
+                    <div className="grid gap-2">
+                        <div className='flex items-center justify-between'>
+                            <Label htmlFor="default_dose_units">Default dose units</Label>
+                            <span className='text-xs text-muted-foreground'>
+                                Optional
+                            </span>
+                        </div>
+                        <form.Field
+                            name="default_dose_units"
+                            children={(field) => (
+                                <div className='relative'>
+                                    <Input
+                                        id="default_dose_units"
+                                        placeholder="Default dose units"
+                                        type="number"
+                                        value={field.state.value}
+                                        onBlur={field.handleBlur}
+                                        disabled={medication_form === ''}
+                                        onChange={(e) => field.handleChange(Number(e.target.value))}
+                                    />
+                                   {medication_form !== '' ? <span className='absolute right-1/6 top-1/2 -translate-y-4 text-xs text-muted-foreground'>
+                                        {insulinForms.includes(medication_form) ? 'units' : oralForms[medication_form as keyof typeof oralForms]}
+                                    </span> : null}
+                                    {field.state.meta.errors.map((error, i) => (
+                                        <div key={i} className="text-red-500 text-sm">
+                                            {error?.message}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        />
+                    </div>
+                    <div className="grid gap-2">
+                        <div className='flex items-center justify-between'>
+                            <Label htmlFor="notes">Notes</Label>
+                            <span className='text-xs text-muted-foreground'>
+                                Optional
+                            </span>
+                        </div>
+                        <form.Field
+                            name="notes"
+                            children={(field) => (
+                                <>
+                                    <Textarea
+                                        id="notes"
+                                        placeholder="Additional information about the medication"
+                                        value={field.state.value}
+                                        onBlur={field.handleBlur}
+                                        onChange={(e) => field.handleChange(e.target.value)}
+                                    />
+                                    {field.state.meta.errors.map((error, i) => (
+                                        <div key={i} className="text-red-500 text-sm">
+                                            {error?.message}
+                                        </div>
+                                    ))}
+                                </>
+                            )}
+                        />
+                    </div>
+                </div>
+                <div>
+                    <form.Subscribe
+                        selector={(state) => [state.canSubmit, state.isSubmitting]}
+                        children={([canSubmit, isSubmitting]) => (
+                            <Button type="submit" disabled={!canSubmit || isSubmitting}>
+                                {isSubmitting ? "Submitting..." : "Submit"}
+                            </Button>
+                        )}
+                    />
+                </div>
+            </form>
+        </div>
+    )
+}
+
+export default MedicationSetup

@@ -1,9 +1,38 @@
 import React from 'react'
+import MedicationSetup from '~/components/logs/forms/medication-setup'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
+
 
 const MedicationPage = () => {
-  return (
-    <div>MedicationPage</div>
-  )
+    return (
+        <main>
+            <h1 className='page-title'>Medication</h1>
+            <Tabs defaultValue="history">
+                <TabsList>
+                    <TabsTrigger value="history">
+                        History
+                    </TabsTrigger>
+                    <TabsTrigger value="upload">
+                        Upload
+                    </TabsTrigger>
+                    <TabsTrigger value="setup">
+                        Setup
+                    </TabsTrigger>
+                </TabsList>
+                <TabsContent value="history">
+                    {/* <MedicationHistory /> */}
+                    History
+                </TabsContent>
+                <TabsContent value="upload">
+                    {/* <MedicationForm /> */}
+                    Upload
+                </TabsContent>
+                <TabsContent value="setup">
+                    <MedicationSetup />
+                </TabsContent>
+            </Tabs>
+        </main>
+    )
 }
 
 export default MedicationPage
