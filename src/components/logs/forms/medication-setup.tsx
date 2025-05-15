@@ -33,9 +33,9 @@ const MedicationSetup = () => {
     const form = useForm({
         defaultValues: {
             name: "",
-            medication_form: "",
+            medicationForm: "",
             strength: "",
-            default_dose_units: 0,
+            defaultDoseUnits: 0,
             notes: ""
         },
         validators: {
@@ -44,12 +44,12 @@ const MedicationSetup = () => {
         onSubmit: ({ value }) => {
             createMedication({
                 ...value,
-                medication_form: value.medication_form as MedicationForm
+                medicationForm: value.medicationForm as MedicationForm
             })
         }
     })
 
-    const medication_form = useStore(form.store, (state) => state.values.medication_form)
+    const medicationForm = useStore(form.store, (state) => state.values.medicationForm)
 
     return (
         <form onSubmit={(e) => {
@@ -82,9 +82,9 @@ const MedicationSetup = () => {
                     />
                 </div>
                 <div className="grid gap-2">
-                    <Label htmlFor="medication_form">Medication Form</Label>
+                    <Label htmlFor="medicationForm">Medication Form</Label>
                     <form.Field
-                        name="medication_form"
+                        name="medicationForm"
                         children={(field) => (
                             <>
                                 <Select onValueChange={(e) => field.handleChange(e)} defaultValue={field.state.value}>
@@ -135,28 +135,28 @@ const MedicationSetup = () => {
                 </div>
                 <div className="grid gap-2">
                     <div className='flex items-center justify-between'>
-                        <Label htmlFor="default_dose_units">Default dose units</Label>
+                        <Label htmlFor="defaultDoseUnits">Default dose units</Label>
                         <span className='text-xs text-muted-foreground'>
                             Optional
                         </span>
                     </div>
                     <form.Field
-                        name="default_dose_units"
+                        name="defaultDoseUnits"
                         children={(field) => (
                             <div className='relative'>
                                 <Input
-                                    id="default_dose_units"
+                                    id="defaultDoseUnits"
                                     placeholder="Default dose units"
                                     type="number"
                                     value={field.state.value}
                                     onBlur={field.handleBlur}
-                                    disabled={medication_form === ''}
+                                    disabled={medicationForm === ''}
                                     onChange={(e) => field.handleChange(Number(e.target.value))}
                                 />
-                                {medication_form !== '' ? <span className='absolute right-1/6 top-1/2 -translate-y-4 text-xs text-muted-foreground'>
-                                    {insulinForms.includes(medication_form)
+                                {medicationForm !== '' ? <span className='absolute right-1/6 top-1/2 -translate-y-4 text-xs text-muted-foreground'>
+                                    {insulinForms.includes(medicationForm)
                                         ? 'units'
-                                        : oralForms[medication_form as keyof typeof oralForms] || ''}
+                                        : oralForms[medicationForm as keyof typeof oralForms] || ''}
                                 </span> : null}
                                 {field.state.meta.errors.map((error, i) => (
                                     <div key={i} className="text-red-500 text-sm">

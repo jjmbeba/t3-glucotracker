@@ -1,6 +1,6 @@
-import { medication } from "~/server/db/schema";
+import { medication, medication_log } from "~/server/db/schema";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { medicationSetupSchema } from "~/schemas/medication";
+import { medicationSetupSchema, medicationUploadSchema } from "~/schemas/medication";
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
@@ -50,6 +50,32 @@ export const medicationRouter = createTRPCRouter({
             if (error instanceof TRPCError) throw error;
 
             if (error instanceof Error) {
+                throw new TRPCError({
+                    code: "INTERNAL_SERVER_ERROR",
+                    message: error.message
+                })
+            }
+        }
+    }),
+    uploadLog: protectedProcedure.input(medicationUploadSchema).mutation(async ({ ctx: { db, auth }, input }) => {
+        try {
+            const { user } = auth;
+
+            await db.insert(medication_log).values({
+                ...input,
+                userId: user.id
+            })
+
+            return {
+                success: true,
+                message: "Medication log uploaded successfully"
+            }
+            
+            
+        }catch(error){
+            if(error instanceof TRPCError) throw error;
+
+            if(error instanceof Error) {
                 throw new TRPCError({
                     code: "INTERNAL_SERVER_ERROR",
                     message: error.message

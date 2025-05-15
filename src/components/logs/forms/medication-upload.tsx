@@ -1,7 +1,8 @@
 'use client'
 
-import { useForm } from '@tanstack/react-form';
+import { useForm, useStore } from '@tanstack/react-form';
 import { Info, Loader2 } from 'lucide-react';
+import { useEffect } from 'react';
 import { toast } from 'sonner';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
@@ -17,22 +18,31 @@ const MedicationUploadForm = () => {
         namesOnly: true
     });
 
+    const { mutate: uploadLog, isPending } = api.medication.uploadLog.useMutation({
+        onSuccess: (data) => {
+            toast.success(data?.message)
+        },
+        onError: (error) => {
+            toast.error(error.message)
+        }
+    })
+
     if (error) {
         toast.error(error.message)
     }
 
     const form = useForm({
         defaultValues: {
-            medication_id: medicationSetup?.[0]?.id ?? 0,
-            dose_amount_taken: 0,
-            dose_unit_taken: doseUnits[0],
+            medicationId: medicationSetup?.[0]?.id ?? 0,
+            dosageAmountTaken: 0,
+            dosageUnitTaken: doseUnits[0] ?? "",
             notes: ""
         },
         validators: {
             onChange: medicationUploadSchema
         },
-        onSubmit: ({value}) => {
-            console.log(value)
+        onSubmit: ({ value }) => {
+            uploadLog(value)
         }
     })
 
@@ -52,7 +62,15 @@ const MedicationUploadForm = () => {
         </div>
     }
 
-    form.setFieldValue('medication_id', medicationSetup?.[0]?.id!)
+    const medicationId = useStore(form.store, (state) => state.values.medicationId)
+
+    useEffect(() => {
+        if (medicationId === 0) {
+            form.setFieldValue('medicationId', medicationSetup?.[0]?.id!)
+        }
+
+    }, [medicationId, form])
+
 
     return (
         <form onSubmit={(e) => {
@@ -63,12 +81,14 @@ const MedicationUploadForm = () => {
         }} className="grid gap-4 mt-3">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div className="grid gap-2">
-                    <Label htmlFor="medication_id">Medication</Label>
+                    <Label htmlFor="medicationId">Medication</Label>
                     <form.Field
-                        name="medication_id"
+                        name="medicationId"
                         children={(field) => (
                             <>
-                                <Select value={field.state.value.toString()} onValueChange={(e) => field.handleChange(parseInt(e))}>
+                                <Select value={field.state.value.toString()} onValueChange={(e) => {
+                                    field.handleChange(parseInt(e))
+                                }}>
                                     <SelectTrigger className='w-full'>
                                         <SelectValue placeholder="Select your medication" />
                                     </SelectTrigger>
@@ -90,9 +110,9 @@ const MedicationUploadForm = () => {
                     />
                 </div>
                 <div className="grid gap-2">
-                    <Label htmlFor="dose_amount_taken">Dose Amount Taken</Label>
+                    <Label htmlFor="dosageAmountTaken">Dose Amount Taken</Label>
                     <form.Field
-                        name="dose_amount_taken"
+                        name="dosageAmountTaken"
                         children={(field) => (
                             <>
                                 <Input type='number' value={field.state.value} onChange={(e) => field.handleChange(parseInt(e.target.value))} />
@@ -106,12 +126,12 @@ const MedicationUploadForm = () => {
                     />
                 </div>
                 <div className="grid gap-2">
-                    <Label htmlFor="dose_unit_taken">Dose Unit Taken</Label>
+                    <Label htmlFor="dosageUnitTaken">Dose Unit Taken</Label>
                     <form.Field
-                        name="dose_unit_taken"
+                        name="dosageUnitTaken"
                         children={(field) => (
                             <>
-                                <Select>
+                                <Select value={field.state.value} onValueChange={(e) => field.handleChange(e)}>
                                     <SelectTrigger className="w-full">
                                         <SelectValue placeholder="Select a dose unit" />
                                     </SelectTrigger>
@@ -156,7 +176,7 @@ const MedicationUploadForm = () => {
                 <form.Subscribe
                     selector={(state) => [state.canSubmit, state.isSubmitting]}
                     children={([canSubmit, isSubmitting]) => (
-                        <Button type='submit' disabled={!canSubmit || isSubmitting}>
+                        <Button type='submit' disabled={!canSubmit || isSubmitting || isPending}>
                             {isSubmitting ? <Loader2 className='size-4 animate-spin' /> : "Submit"}
                         </Button>
                     )}

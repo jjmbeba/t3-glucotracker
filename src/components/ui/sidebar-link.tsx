@@ -1,8 +1,7 @@
 'use client'
 
 import React from 'react'
-import { SidebarMenuSubButton } from './sidebar'
-import { SidebarMenuSubItem } from './sidebar'
+import { SidebarMenuSubButton, SidebarMenuSubItem } from './sidebar'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
