@@ -1,15 +1,9 @@
-import React from 'react'
 import MedicationSetup from '~/components/logs/forms/medication-setup'
 import MedicationUploadForm from '~/components/logs/forms/medication-upload'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
-import { api, HydrateClient } from '~/trpc/server'
-import ClientBoundary from '~/components/client-boundary'
+import { HydrateClient } from '~/trpc/server'
 
 const MedicationPage = async () => {
-    void api.medication.getMedicationSetup.prefetch({
-        namesOnly: true
-    })
-
     return (
         <HydrateClient>
             <main>
@@ -32,14 +26,10 @@ const MedicationPage = async () => {
                             Medication history will be displayed here.
                         </TabsContent>
                         <TabsContent value="upload">
-                            <ClientBoundary>
-                                <MedicationUploadForm />
-                            </ClientBoundary>
+                            <MedicationUploadForm />
                         </TabsContent>
                         <TabsContent value="setup">
-                            <ClientBoundary>
-                                <MedicationSetup />
-                            </ClientBoundary>
+                            <MedicationSetup />
                         </TabsContent>
                     </div>
                 </Tabs>
