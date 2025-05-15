@@ -33,18 +33,27 @@ const MedicationUploadForm = () => {
 
     const form = useForm({
         defaultValues: {
-            medicationId: medicationSetup?.[0]?.id ?? 0,
+            medicationId:  0,
             dosageAmountTaken: 0,
             dosageUnitTaken: doseUnits[0] ?? "",
             notes: ""
         },
         validators: {
-            onChange: medicationUploadSchema
+            onBlur: medicationUploadSchema
         },
         onSubmit: ({ value }) => {
             uploadLog(value)
         }
     })
+
+    const medicationId = useStore(form.store, (state) => state.values.medicationId)
+
+    useEffect(() => {
+        if (medicationId === 0) {
+            form.setFieldValue('medicationId', medicationSetup?.[0]?.id ?? 0)
+        }
+
+    }, [medicationId, form, medicationSetup])
 
     if (isLoading) {
         return <div className='min-h-[70vh] flex items-center justify-center gap-4'>
@@ -61,15 +70,6 @@ const MedicationUploadForm = () => {
             </div>
         </div>
     }
-
-    const medicationId = useStore(form.store, (state) => state.values.medicationId)
-
-    useEffect(() => {
-        if (medicationId === 0) {
-            form.setFieldValue('medicationId', medicationSetup?.[0]?.id!)
-        }
-
-    }, [medicationId, form, medicationSetup])
 
 
     return (
