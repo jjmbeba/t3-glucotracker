@@ -14,7 +14,9 @@ export const medicationSetupSchema = z.object({
 })
 
 export const medicationUploadSchema = z.object({
-    medicationId: z.number().min(1, {
+    medicationId: z.number({
+        message: "Select a valid medication"
+    }).min(1, {
         message: "Medication ID is required"
     }),
     dosageAmountTaken: z.number().min(1, {
