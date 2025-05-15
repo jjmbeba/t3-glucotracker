@@ -1,10 +1,9 @@
-import { medication, medication_log } from "~/server/db/schema";
-import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { medicationSetupSchema, medicationUploadSchema } from "~/schemas/medication";
-import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
 import { handleTRPCError } from "~/lib/errors";
+import { medicationSetupSchema, medicationUploadSchema } from "~/schemas/medication";
+import { medication, medication_log } from "~/server/db/schema";
+import { createTRPCRouter, protectedProcedure } from "../trpc";
 
 
 export const medicationRouter = createTRPCRouter({
