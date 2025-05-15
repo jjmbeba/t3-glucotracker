@@ -42,6 +42,11 @@ const MedicationSetup = () => {
             onChange: medicationSetupSchema
         },
         onSubmit: ({ value }) => {
+            if (!medicationForms.includes(value.medicationForm as any)) {
+                toast.error("Invalid medication form selected");
+                return;
+            }
+
             createMedication({
                 ...value,
                 medicationForm: value.medicationForm as MedicationForm
@@ -73,7 +78,7 @@ const MedicationSetup = () => {
                                     onChange={(e) => field.handleChange(e.target.value)}
                                 />
                                 {field.state.meta.errors.map((error, i) => (
-                                    <div key={i} className="text-red-500 text-sm">
+                                    <div key={`${field.name}-error-${i}`} className="text-red-500 text-sm">
                                         {error?.message}
                                     </div>
                                 ))}
@@ -98,7 +103,7 @@ const MedicationSetup = () => {
                                     </SelectContent>
                                 </Select>
                                 {field.state.meta.errors.map((error, i) => (
-                                    <div key={i} className="text-red-500 text-sm">
+                                    <div key={`${field.name}-error-${i}`} className="text-red-500 text-sm">
                                         {error?.message}
                                     </div>
                                 ))}
@@ -125,7 +130,7 @@ const MedicationSetup = () => {
                                     onChange={(e) => field.handleChange(e.target.value)}
                                 />
                                 {field.state.meta.errors.map((error, i) => (
-                                    <div key={i} className="text-red-500 text-sm">
+                                    <div key={`${field.name}-error-${i}`} className="text-red-500 text-sm">
                                         {error?.message}
                                     </div>
                                 ))}
@@ -159,7 +164,7 @@ const MedicationSetup = () => {
                                         : oralForms[medicationForm as keyof typeof oralForms] || ''}
                                 </span> : null}
                                 {field.state.meta.errors.map((error, i) => (
-                                    <div key={i} className="text-red-500 text-sm">
+                                    <div key={`${field.name}-error-${i}`} className="text-red-500 text-sm">
                                         {error?.message}
                                     </div>
                                 ))}
@@ -186,7 +191,7 @@ const MedicationSetup = () => {
                                     onChange={(e) => field.handleChange(e.target.value)}
                                 />
                                 {field.state.meta.errors.map((error, i) => (
-                                    <div key={i} className="text-red-500 text-sm">
+                                    <div key={`${field.name}-error-${i}`} className="text-red-500 text-sm">
                                         {error?.message}
                                     </div>
                                 ))}

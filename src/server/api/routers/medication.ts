@@ -4,6 +4,7 @@ import { medicationSetupSchema, medicationUploadSchema } from "~/schemas/medicat
 import { TRPCError } from "@trpc/server";
 import { eq } from "drizzle-orm";
 import { z } from "zod";
+import { handleTRPCError } from "~/lib/errors";
 
 
 export const medicationRouter = createTRPCRouter({
@@ -21,19 +22,12 @@ export const medicationRouter = createTRPCRouter({
                 message: "Medication setup created successfully"
             }
         } catch (error) {
-            if(error instanceof TRPCError) throw error;
-
-            if(error instanceof Error) {
-                throw new TRPCError({
-                    code: "INTERNAL_SERVER_ERROR",
-                    message: error.message
-                })
-            }
+            handleTRPCError(error)
         }
     }),
     getMedicationSetup: protectedProcedure.input(z.object({
         namesOnly: z.boolean().optional().default(false)
-    })).query(async ({ ctx: { db, auth }, input }) => {
+    })).query<Array<{ name: string, id: number }> | Array<typeof medication.$inferSelect>>(async ({ ctx: { db, auth }, input }) => {
         try {
             const { user } = auth;
 
@@ -47,14 +41,7 @@ export const medicationRouter = createTRPCRouter({
             return await db.select().from(medication).where(eq(medication.userId, user.id));
 
         } catch (error) {
-            if (error instanceof TRPCError) throw error;
-
-            if (error instanceof Error) {
-                throw new TRPCError({
-                    code: "INTERNAL_SERVER_ERROR",
-                    message: error.message
-                })
-            }
+            handleTRPCError(error)
         }
     }),
     uploadLog: protectedProcedure.input(medicationUploadSchema).mutation(async ({ ctx: { db, auth }, input }) => {
@@ -73,14 +60,7 @@ export const medicationRouter = createTRPCRouter({
             
             
         }catch(error){
-            if(error instanceof TRPCError) throw error;
-
-            if(error instanceof Error) {
-                throw new TRPCError({
-                    code: "INTERNAL_SERVER_ERROR",
-                    message: error.message
-                })
-            }
+            handleTRPCError(error)
         }
     })
 })

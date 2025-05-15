@@ -69,7 +69,7 @@ const MedicationUploadForm = () => {
             form.setFieldValue('medicationId', medicationSetup?.[0]?.id!)
         }
 
-    }, [medicationId, form])
+    }, [medicationId, form, medicationSetup])
 
 
     return (
@@ -101,7 +101,7 @@ const MedicationUploadForm = () => {
                                     </SelectContent>
                                 </Select>
                                 {field.state.meta.errors.map((error, i) => (
-                                    <div key={i} className="text-red-500 text-sm">
+                                    <div key={`${field.name}-error-${i}`} className="text-red-500 text-sm">
                                         {error?.message}
                                     </div>
                                 ))}
@@ -117,7 +117,7 @@ const MedicationUploadForm = () => {
                             <>
                                 <Input type='number' value={field.state.value} onChange={(e) => field.handleChange(parseInt(e.target.value))} />
                                 {field.state.meta.errors.map((error, i) => (
-                                    <div key={i} className="text-red-500 text-sm">
+                                    <div key={`${field.name}-error-${i}`} className="text-red-500 text-sm">
                                         {error?.message}
                                     </div>
                                 ))}
@@ -142,7 +142,7 @@ const MedicationUploadForm = () => {
                                     </SelectContent>
                                 </Select>
                                 {field.state.meta.errors.map((error, i) => (
-                                    <div key={i} className="text-red-500 text-sm">
+                                    <div key={`${field.name}-error-${i}`} className="text-red-500 text-sm">
                                         {error?.message}
                                     </div>
                                 ))}
@@ -163,7 +163,7 @@ const MedicationUploadForm = () => {
                                     className="w-full"
                                 />
                                 {field.state.meta.errors.map((error, i) => (
-                                    <div key={i} className="text-red-500 text-sm">
+                                    <div key={`${field.name}-error-${i}`} className="text-red-500 text-sm">
                                         {error?.message}
                                     </div>
                                 ))}

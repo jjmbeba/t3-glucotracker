@@ -3,7 +3,7 @@ import MedicationSetup from '~/components/logs/forms/medication-setup'
 import MedicationUploadForm from '~/components/logs/forms/medication-upload'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
 import { api, HydrateClient } from '~/trpc/server'
-
+import ClientBoundary from '~/components/client-boundary'
 
 const MedicationPage = async () => {
     void api.medication.getMedicationSetup.prefetch({
@@ -32,14 +32,18 @@ const MedicationPage = async () => {
                             Medication history will be displayed here.
                         </TabsContent>
                         <TabsContent value="upload">
-                            <MedicationUploadForm />
+                            <ClientBoundary>
+                                <MedicationUploadForm />
+                            </ClientBoundary>
                         </TabsContent>
                         <TabsContent value="setup">
-                            <MedicationSetup />
+                            <ClientBoundary>
+                                <MedicationSetup />
+                            </ClientBoundary>
                         </TabsContent>
                     </div>
                 </Tabs>
-            </main >
+            </main>
         </HydrateClient>
     )
 }
