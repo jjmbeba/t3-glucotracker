@@ -5,17 +5,17 @@ import { api, type GetGlucoseLogsOutput } from '~/trpc/react'
 import dayjs from "dayjs"
 import { usePathname } from "next/navigation"
 import { useEffect, useState } from "react"
+import { toast } from 'sonner'
 import { GlucoseDistributionChart } from "~/components/charts/glucose/glucose-distribution"
 import { GlucoseHistoryChart } from "~/components/charts/glucose/glucose-history"
+import GlucosePieChart from '~/components/charts/glucose/glucose-pie'
 import {
     type ChartConfig
 } from "~/components/ui/chart"
+import { Skeleton } from "~/components/ui/skeleton"
 import { cn } from "~/lib/utils"
 import FilterLabels from "../common/filter-labels"
 import FilterGlucoseLogs from "../common/filter-logs"
-import GlucosePieChart from '~/components/charts/glucose/glucose-pie'
-import { Skeleton } from "~/components/ui/skeleton"
-import { toast } from 'sonner'
 
 const chartConfig = {
     glucose: {
@@ -107,7 +107,7 @@ const GlucoseHistory = ({ timePeriod }: { timePeriod: string }) => {
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
                 <div className="lg:col-span-1">
-                    <GlucoseHistoryChart glucoseLogs={glucoseLogs ?? []} chartConfig={chartConfig} />
+                    <GlucoseHistoryChart className="mt-2" glucoseLogs={glucoseLogs ?? []} chartConfig={chartConfig} />
                 </div>
                 <div className="lg:col-span-1">
                     <GlucoseDistributionChart glucoseLogs={glucoseLogs ?? []} chartConfig={chartConfig} />
