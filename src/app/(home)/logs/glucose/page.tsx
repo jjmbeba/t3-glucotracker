@@ -31,7 +31,6 @@ const GlucoseLogsPage = async (props : {
                     <TabsContent value='upload'>
                         <GlucoseForm />
                     </TabsContent>
-
                 </Tabs>
             </div>
         </HydrateClient>

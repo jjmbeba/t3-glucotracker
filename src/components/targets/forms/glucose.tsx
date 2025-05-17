@@ -21,6 +21,7 @@ const GlucoseTargetForm = () => {
         onSuccess: () => {
             toast.success('Targets set successfully')
             queryClient.invalidateQueries({ queryKey: targetsKey })
+            form.reset()
         },
         onError: (error) => {
             toast.error(error.message)
