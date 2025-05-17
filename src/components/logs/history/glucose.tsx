@@ -57,6 +57,7 @@ const GlucoseHistorySkeleton = () => {
 
 const GlucoseHistory = ({ timePeriod }: { timePeriod: string }) => {
     const { data, isLoading: isGlucoseLogsLoading, error } = api.glucose.getLogs.useQuery()
+    const { data: glucoseTargets, error: glucoseTargetsError } = api.glucose.getTargets.useQuery()
 
     const [glucoseLogs, setGlucoseLogs] = useState<GetGlucoseLogsOutput>([])
     const pathname = usePathname()
@@ -76,6 +77,11 @@ const GlucoseHistory = ({ timePeriod }: { timePeriod: string }) => {
     if (error) {
         toast.error("Error fetching glucose logs")
         console.error(error)
+    }
+
+    if (glucoseTargetsError) {
+        toast.error("Error fetching glucose targets")
+        console.error(glucoseTargetsError)
     }
 
     const timePeriodLabel = timePeriod === "lastWeek" ? "Last week" : timePeriod === "lastMonth" ? "Last month" : null
@@ -107,7 +113,7 @@ const GlucoseHistory = ({ timePeriod }: { timePeriod: string }) => {
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
                 <div className="lg:col-span-1">
-                    <GlucoseHistoryChart className="mt-2" glucoseLogs={glucoseLogs ?? []} chartConfig={chartConfig} />
+                    <GlucoseHistoryChart className="mt-2" glucoseLogs={glucoseLogs ?? []} glucoseTargets={glucoseTargets ?? []} chartConfig={chartConfig} />
                 </div>
                 <div className="lg:col-span-1">
                     <GlucoseDistributionChart glucoseLogs={glucoseLogs ?? []} chartConfig={chartConfig} />

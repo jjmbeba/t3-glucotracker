@@ -1,19 +1,20 @@
 'use client'
 
 import dayjs from "dayjs"
-import { CartesianGrid, Line, LineChart, XAxis } from "recharts"
+import { CartesianGrid, Line, LineChart, XAxis, ReferenceLine } from "recharts"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card"
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "~/components/ui/chart"
 import { cn } from "~/lib/utils"
-import type { GetGlucoseLogsOutput } from "~/trpc/react"
+import type { GetGlucoseLogsOutput, GetGlucoseTargetsOutput } from "~/trpc/react"
 
 type GlucoseHistoryChartProps = {
     glucoseLogs: GetGlucoseLogsOutput,
+    glucoseTargets: GetGlucoseTargetsOutput,
     chartConfig: ChartConfig,
     className?: string
 }
 
-export const GlucoseHistoryChart = ({ glucoseLogs, chartConfig, className }: GlucoseHistoryChartProps) => {
+export const GlucoseHistoryChart = ({ glucoseLogs, chartConfig, glucoseTargets, className }: GlucoseHistoryChartProps) => {
     return (
         <Card className={cn(className)}>
             <CardHeader>
@@ -38,6 +39,12 @@ export const GlucoseHistoryChart = ({ glucoseLogs, chartConfig, className }: Glu
                             }}
                         >
                             <CartesianGrid vertical={false} />
+                            {glucoseTargets.map(target => (
+                                <ReferenceLine y={target.lowThreshold} stroke="var(--chart-3)" strokeDasharray={"3 3"} strokeWidth={2} label={{ value: "Low threshold", position: "top" }} />
+                            ))}
+                            {glucoseTargets.map(target => (
+                                <ReferenceLine y={target.highThreshold} stroke="var(--chart-1)" strokeDasharray={"3 3"} strokeWidth={2} label={{ value: "High threshold", position: "top" }} />
+                            ))}
                             <XAxis
                                 dataKey="date"
                                 tickLine={false}
