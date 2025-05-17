@@ -13,6 +13,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu"
+import Link from 'next/link'
 
 
 const QuickAddButton = () => {
@@ -29,8 +30,16 @@ const QuickAddButton = () => {
             <DropdownMenuContent>
                 <DropdownMenuLabel>Add</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>Glucose Log</DropdownMenuItem>
-                <DropdownMenuItem>Medication Log</DropdownMenuItem>
+                <DropdownMenuItem>
+                    <Link href={`/logs/glucose?tab=upload`}>
+                        Glucose Log
+                    </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                    <Link href="/logs/medication?tab=upload">
+                        Medication Log
+                    </Link>
+                </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
 

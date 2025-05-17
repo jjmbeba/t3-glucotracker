@@ -12,6 +12,7 @@ const GlucoseLogsPage = async (props : {
 
     const searchParams = await props.searchParams
     const timePeriod = searchParams.timePeriod
+    const tab = searchParams.tab
 
     return (
         <HydrateClient>
@@ -19,7 +20,7 @@ const GlucoseLogsPage = async (props : {
                 <h2 className='page-title'>
                     Glucose
                 </h2>
-                <Tabs defaultValue='history'>
+                <Tabs defaultValue={tab as string ?? 'history'}>
                     <TabsList>
                         <TabsTrigger value='history'>History</TabsTrigger>
                         <TabsTrigger value='upload'>Upload</TabsTrigger>

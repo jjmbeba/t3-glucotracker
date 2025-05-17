@@ -3,12 +3,19 @@ import MedicationUploadForm from '~/components/logs/forms/medication-upload'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
 import { HydrateClient } from '~/trpc/server'
 
-const MedicationPage = async () => {
+type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>
+
+const MedicationPage = async (props: {
+    searchParams: SearchParams
+}) => {
+    const searchParams = await props.searchParams
+    const tab = searchParams.tab
+
     return (
         <HydrateClient>
             <main>
                 <h1 className='page-title'>Medication</h1>
-                <Tabs defaultValue="history">
+                <Tabs defaultValue={tab as string ?? 'history'}>
                     <TabsList>
                         <TabsTrigger value="history">
                             History
