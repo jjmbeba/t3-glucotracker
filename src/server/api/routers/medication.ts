@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
 import { handleTRPCError } from "~/lib/errors";
 import { medicationSetupSchema, medicationUploadSchema } from "~/schemas/medication";
@@ -59,6 +59,34 @@ export const medicationRouter = createTRPCRouter({
             
             
         }catch(error){
+            handleTRPCError(error)
+        }
+    }),
+    getLastLog: protectedProcedure.query(async ({ ctx: { db, auth } }) => {
+        try {
+            const { user } = auth;
+            
+            const lastLog = await db.select({
+                id: medication_log.id,
+                medicationId: medication_log.medicationId,
+                dosageAmountTaken: medication_log.dosageAmountTaken,
+                dosageUnitTaken: medication_log.dosageUnitTaken,
+                notes: medication_log.notes,
+                createdAt: medication_log.createdAt,
+                medication: {
+                    name: medication.name,
+                    medicationForm: medication.medicationForm,
+                    strength: medication.strength
+                }
+            })
+            .from(medication_log)
+            .leftJoin(medication, eq(medication_log.medicationId, medication.id))
+            .where(eq(medication_log.userId, user.id))
+            .orderBy(desc(medication_log.createdAt))
+            .limit(1);
+
+            return lastLog;
+        } catch (error) {
             handleTRPCError(error)
         }
     })

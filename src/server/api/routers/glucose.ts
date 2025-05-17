@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { handleTRPCError } from "~/lib/errors";
 import { glucoseFormSchema } from "~/schemas/logs";
 import { glucoseLog } from "~/server/db/schema";
@@ -28,6 +28,17 @@ export const glucoseRouter = createTRPCRouter({
                 glucose: glucoseLog.glucose,
                 date: glucoseLog.date,
             }).from(glucoseLog).where(eq(glucoseLog.userId, auth.user.id)).orderBy(glucoseLog.date).limit(100)
+        } catch (error) {
+            handleTRPCError(error)
+        }
+    }),
+    getLastLog: protectedProcedure.query(async ({ ctx: { db, auth } }) => {
+        try {
+            return await db.select({
+                id: glucoseLog.id,
+                glucose: glucoseLog.glucose,
+                date: glucoseLog.date,
+            }).from(glucoseLog).where(eq(glucoseLog.userId, auth.user.id)).orderBy(desc(glucoseLog.date)).limit(1).offset(0)
         } catch (error) {
             handleTRPCError(error)
         }
