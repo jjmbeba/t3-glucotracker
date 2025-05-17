@@ -1,6 +1,8 @@
 "use client"
 
 import { useForm } from '@tanstack/react-form'
+import { useQueryClient } from '@tanstack/react-query'
+import { getQueryKey } from '@trpc/react-query'
 import dayjs from 'dayjs'
 import { CalendarIcon, Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
@@ -24,14 +26,21 @@ import { glucoseFormSchema } from '~/schemas/logs'
 import { api } from '~/trpc/react'
 
 const GlucoseForm = () => {
+    const queryKey = getQueryKey(api.glucose.getLogs, undefined, 'query')
+    const queryClient = useQueryClient()
+
     const { mutate: createGlucoseLog, isPending: isGlucoseLogPending } = api.glucose.create.useMutation({
         onSuccess: () => {
             form.reset()
 
             toast.success("Glucose log created successfully")
+            queryClient.invalidateQueries({
+                queryKey
+            })
         },
         onError: (error) => {
             toast.error(error.message)
+            console.error(error)
         }
     })
 
