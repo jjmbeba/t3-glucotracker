@@ -116,7 +116,7 @@ const GlucoseHistory = ({ timePeriod }: { timePeriod: string }) => {
                     <GlucoseHistoryChart className="mt-2" glucoseLogs={glucoseLogs ?? []} glucoseTargets={glucoseTargets ?? []} chartConfig={chartConfig} />
                 </div>
                 <div className="lg:col-span-1">
-                    <GlucoseDistributionChart glucoseLogs={glucoseLogs ?? []} chartConfig={chartConfig} />
+                    <GlucoseDistributionChart glucoseLogs={glucoseLogs ?? []} glucoseTargets={glucoseTargets ?? []} chartConfig={chartConfig} />
                 </div>
                 <div className="lg:col-span-1">
                     <GlucosePieChart glucoseLogs={glucoseLogs ?? []} />
