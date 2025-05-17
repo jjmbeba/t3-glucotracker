@@ -123,6 +123,7 @@ createdAt: d
 
 export const glucose_target = createTable("glucose_target", (d) => ({
 	id: d.integer('id').primaryKey().generatedByDefaultAsIdentity(),
+	targetName: d.text('target_name').notNull(),
 	userId: d.text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
 	lowThreshold: d.integer('low_threshold').notNull(),
 	highThreshold: d.integer('high_threshold').notNull(),

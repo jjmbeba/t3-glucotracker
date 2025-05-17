@@ -46,7 +46,7 @@ export const glucoseRouter = createTRPCRouter({
     }),
     getTargets: protectedProcedure.query(async ({ ctx: { db, auth } }) => {
         try {
-            return await db.select().from(glucose_target).where(eq(glucose_target.userId, auth.user.id))
+        return await db.select().from(glucose_target).where(eq(glucose_target.userId, auth.user.id))
         } catch (error) {
             handleTRPCError(error)
         }
@@ -57,6 +57,11 @@ export const glucoseRouter = createTRPCRouter({
                 ...input,
                 userId: auth.user.id,
             })
+
+            return {
+                success: true,
+                message: "Targets set successfully"
+            }
         } catch (error) {
             handleTRPCError(error)
         }

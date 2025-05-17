@@ -30,9 +30,10 @@ const GlucoseTargetForm = () => {
 
     const form = useForm({
         defaultValues: {
-            lowThreshold: 0,
-            highThreshold: 0,
-            units: 'mg/dL',
+            targetName: 'Default',
+            lowThreshold: 80,
+            highThreshold: 140,
+            units: 'mg/dL' as 'mg/dL' | 'mmol/L',
         },
         onSubmit: ({ value }) => {
             setTargets(value)
@@ -51,6 +52,29 @@ const GlucoseTargetForm = () => {
         }} className="grid gap-4 mt-3">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div className="grid gap-2">
+                    <Label htmlFor="targetName">Target Name</Label>
+                    <form.Field
+                        name="targetName"
+                        children={(field) => (
+                            <>
+                                <Input
+                                    id="targetName"
+                                    type="text"
+                                    placeholder="Default"
+                                    value={field.state.value}
+                                    onBlur={field.handleBlur}
+                                    onChange={(e) => field.handleChange(e.target.value)}
+                                />
+                                {field.state.meta.errors.map((error, i) => (
+                                    <div key={`${error?.path}-${i}`} className="text-red-500 text-sm">
+                                        {error?.message}
+                                    </div>
+                                ))}
+                            </>
+                        )}
+                    />
+                </div>
+                <div className="grid gap-2">
                     <Label htmlFor="lowThreshold">Low Threshold</Label>
                     <form.Field
                         name="lowThreshold"
@@ -65,7 +89,7 @@ const GlucoseTargetForm = () => {
                                     onChange={(e) => field.handleChange(parseInt(e.target.value))}
                                 />
                                 {field.state.meta.errors.map((error, i) => (
-                                    <div key={i} className="text-red-500 text-sm">
+                                    <div key={`${error?.path}-${i}`} className="text-red-500 text-sm">
                                         {error?.message}
                                     </div>
                                 ))}
@@ -88,7 +112,7 @@ const GlucoseTargetForm = () => {
                                     onChange={(e) => field.handleChange(parseInt(e.target.value))}
                                 />
                                 {field.state.meta.errors.map((error, i) => (
-                                    <div key={i} className="text-red-500 text-sm">
+                                    <div key={`${error?.path}-${i}`} className="text-red-500 text-sm">
                                         {error?.message}
                                     </div>
                                 ))}
@@ -102,7 +126,10 @@ const GlucoseTargetForm = () => {
                         name="units"
                         children={(field) => (
                             <>
-                                <Select onValueChange={field.handleChange} defaultValue={field.state.value}>
+                                <Select 
+                                    onValueChange={(value) => field.handleChange(value as 'mg/dL' | 'mmol/L')} 
+                                    defaultValue={field.state.value}
+                                >
                                     <SelectTrigger className='w-full'>
                                         <SelectValue placeholder="Select a unit" />
                                     </SelectTrigger>
@@ -112,7 +139,7 @@ const GlucoseTargetForm = () => {
                                     </SelectContent>
                                 </Select>
                                 {field.state.meta.errors.map((error, i) => (
-                                    <div key={i} className="text-red-500 text-sm">
+                                    <div key={`${error?.path}-${i}`} className="text-red-500 text-sm">
                                         {error?.message}
                                     </div>
                                 ))}
