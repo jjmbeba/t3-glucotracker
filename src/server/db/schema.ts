@@ -121,3 +121,15 @@ createdAt: d
  	updatedAt: d.timestamp({ withTimezone: true }).$onUpdate(() => new Date()),
 }))
 
+export const glucose_target = createTable("glucose_target", (d) => ({
+	id: d.integer('id').primaryKey().generatedByDefaultAsIdentity(),
+	userId: d.text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+	lowThreshold: d.integer('low_threshold').notNull(),
+	highThreshold: d.integer('high_threshold').notNull(),
+	units: d.text('units').notNull(),
+	createdAt: d
+		.timestamp({ withTimezone: true })
+		.default(sql`CURRENT_TIMESTAMP`)
+		.notNull(),
+	updatedAt: d.timestamp({ withTimezone: true }).$onUpdate(() => new Date()),
+}))

@@ -17,7 +17,7 @@ const MedicationPage = async (props: {
                 <h1 className='page-title'>Medication</h1>
                 <Tabs defaultValue={tab as string ?? 'history'}>
                     <TabsList>
-                        <TabsTrigger value="history">
+                    <TabsTrigger value="history">
                             History
                         </TabsTrigger>
                         <TabsTrigger value="upload">
