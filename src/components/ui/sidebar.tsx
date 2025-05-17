@@ -520,7 +520,7 @@ function SidebarMenuButton({
       className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
       {...props}
     />
-  )a
+  )
 
   if (!tooltip) {
     return button
