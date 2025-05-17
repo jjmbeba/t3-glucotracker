@@ -1,15 +1,33 @@
 'use client'
 
 import { useForm } from '@tanstack/react-form'
+import { useQueryClient } from '@tanstack/react-query'
+import { getQueryKey } from '@trpc/react-query'
 import { InfoIcon, Loader2 } from 'lucide-react'
-import React from 'react'
+import { toast } from 'sonner'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
-import { Select, SelectItem, SelectContent, SelectValue, SelectTrigger } from '~/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~/components/ui/select'
 import { glucoseTargetSchema } from '~/schemas/targets'
+import { api } from '~/trpc/react'
 
 const GlucoseTargetForm = () => {
+    const queryClient = useQueryClient()
+
+    const targetsKey = getQueryKey(api.glucose.getTargets, undefined, 'query')
+
+    const { mutate: setTargets, isPending: isSetTargetsPending } = api.glucose.setTargets.useMutation({
+        onSuccess: () => {
+            toast.success('Targets set successfully')
+            queryClient.invalidateQueries({ queryKey: targetsKey })
+        },
+        onError: (error) => {
+            toast.error(error.message)
+            console.error(error)
+        }
+    })
+
     const form = useForm({
         defaultValues: {
             lowThreshold: 0,
@@ -17,7 +35,7 @@ const GlucoseTargetForm = () => {
             units: 'mg/dL',
         },
         onSubmit: ({ value }) => {
-            console.log(value)
+            setTargets(value)
         },
         validators: {
             onChange: glucoseTargetSchema
@@ -85,7 +103,7 @@ const GlucoseTargetForm = () => {
                         children={(field) => (
                             <>
                                 <Select onValueChange={field.handleChange} defaultValue={field.state.value}>
-                                    <SelectTrigger>
+                                    <SelectTrigger className='w-full'>
                                         <SelectValue placeholder="Select a unit" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -118,8 +136,8 @@ const GlucoseTargetForm = () => {
                     selector={(state) => [state.canSubmit, state.isSubmitting]}
                     children={([canSubmit, isSubmitting]) => (
                         <div className='flex gap-2'>
-                            <Button type='submit' disabled={!canSubmit || isSubmitting}>
-                                {isSubmitting ? <Loader2 className='size-4 animate-spin' /> : 'Save'}
+                            <Button type='submit' disabled={!canSubmit || isSubmitting || isSetTargetsPending}>
+                                {isSubmitting || isSetTargetsPending ? <Loader2 className='size-4 animate-spin' /> : 'Save'}
                             </Button>
                         </div>
                     )}

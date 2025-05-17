@@ -3,6 +3,7 @@ import { handleTRPCError } from "~/lib/errors";
 import { glucoseFormSchema } from "~/schemas/logs";
 import { glucose_target, glucoseLog } from "~/server/db/schema";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { glucoseTargetSchema } from "~/schemas/targets";
 
 export const glucoseRouter = createTRPCRouter({
     create: protectedProcedure.input(glucoseFormSchema).mutation(async ({ ctx: { db, auth }, input }) => {
@@ -46,6 +47,16 @@ export const glucoseRouter = createTRPCRouter({
     getTargets: protectedProcedure.query(async ({ ctx: { db, auth } }) => {
         try {
             return await db.select().from(glucose_target).where(eq(glucose_target.userId, auth.user.id))
+        } catch (error) {
+            handleTRPCError(error)
+        }
+    }),
+    setTargets: protectedProcedure.input(glucoseTargetSchema).mutation(async ({ ctx: { db, auth }, input }) => {
+        try {
+            await db.insert(glucose_target).values({
+                ...input,
+                userId: auth.user.id,
+            })
         } catch (error) {
             handleTRPCError(error)
         }
