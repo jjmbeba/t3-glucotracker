@@ -56,8 +56,8 @@ const GlucoseHistorySkeleton = () => {
 }
 
 const GlucoseHistory = ({ timePeriod }: { timePeriod: string }) => {
+    const { data: glucoseTargets, isLoading: isGlucoseTargetsLoading, error: glucoseTargetsError } = api.glucose.getTargets.useQuery()
     const { data, isLoading: isGlucoseLogsLoading, error } = api.glucose.getLogs.useQuery()
-    const { data: glucoseTargets, error: glucoseTargetsError } = api.glucose.getTargets.useQuery()
 
     const [glucoseLogs, setGlucoseLogs] = useState<GetGlucoseLogsOutput>([])
     const pathname = usePathname()
@@ -86,7 +86,7 @@ const GlucoseHistory = ({ timePeriod }: { timePeriod: string }) => {
 
     const timePeriodLabel = timePeriod === "lastWeek" ? "Last week" : timePeriod === "lastMonth" ? "Last month" : null
 
-    if (isGlucoseLogsLoading) {
+    if (isGlucoseLogsLoading || isGlucoseTargetsLoading) {
         return <GlucoseHistorySkeleton />
     }
 
