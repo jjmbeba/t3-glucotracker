@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { HydrateClient } from "~/trpc/server";
 import { SignInButton } from "../components/auth/sign-in-button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
-import { Droplet, LineChart, Clock, Pill } from "lucide-react";
+import { Droplet, LineChart, Clock, Pill, Loader2 } from "lucide-react";
 
 export default async function Home() {
 	const features = [
@@ -63,7 +63,7 @@ export default async function Home() {
 					</div>
 
 					<div className="flex flex-col items-center gap-4 pt-4">
-						<Suspense fallback={<p>Loading...</p>}>
+						<Suspense fallback={<Loader2 className="w-4 h-4 animate-spin" />}>
 							<SignInButton />
 						</Suspense>
 						<p className="text-sm text-muted-foreground text-center">
