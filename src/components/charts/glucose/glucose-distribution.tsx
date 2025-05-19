@@ -1,14 +1,31 @@
 'use client'
 
-import { ChartTooltipContent, ChartTooltip, type ChartConfig, } from "~/components/ui/chart"
-import { CartesianGrid, Scatter, ScatterChart, XAxis, YAxis } from "recharts"
-import { ChartContainer } from "~/components/ui/chart"
-import { CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card"
-import { Card } from "~/components/ui/card"
-import type { GetGlucoseLogsOutput } from "~/trpc/react"
 import dayjs from "dayjs"
+import { useMemo } from "react"
+import { CartesianGrid, Dot, Scatter, ScatterChart, XAxis, YAxis } from "recharts"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card"
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig, } from "~/components/ui/chart"
+import type { GetGlucoseLogsOutput, GetGlucoseTargetsOutput } from "~/trpc/react"
 
-export const GlucoseDistributionChart = ({ glucoseLogs, chartConfig }: { glucoseLogs: GetGlucoseLogsOutput, chartConfig: ChartConfig }) => {
+export interface GlucoseDataPoint {
+    x: number;
+    y: number;
+    glucose: number;
+    notes?: string;
+}
+
+export interface CustomizedDotProps {
+    cx?: number;
+    cy?: number;
+    payload?: GlucoseDataPoint;
+    targetLow: number;
+    targetHigh: number;
+}
+
+export const GlucoseDistributionChart = ({ glucoseLogs, glucoseTargets, chartConfig }: { glucoseLogs: GetGlucoseLogsOutput, glucoseTargets: GetGlucoseTargetsOutput, chartConfig: ChartConfig }) => {
+    const lowThreshold = glucoseTargets[0]?.lowThreshold ?? 0
+    const highThreshold = glucoseTargets[0]?.highThreshold ?? 0
+
     return (
         <div>
             <Card className="mt-2">
@@ -50,7 +67,7 @@ export const GlucoseDistributionChart = ({ glucoseLogs, chartConfig }: { glucose
                                 <Scatter
                                     dataKey="glucose"
                                     type="natural"
-                                    fill="var(--chart-5)"
+                                    shape={<CustomizedDot targetLow={lowThreshold} targetHigh={highThreshold} />}
                                 />
                             </ScatterChart>
                         </ChartContainer>
@@ -64,3 +81,26 @@ export const GlucoseDistributionChart = ({ glucoseLogs, chartConfig }: { glucose
         </div>
     )
 }
+
+const CustomizedDot: React.FC<CustomizedDotProps> = (props) => {
+    const { cx, cy, payload, targetLow, targetHigh } = props;
+
+    if (payload === undefined) return null
+
+    const glucoseValue = payload.glucose;
+
+    if (typeof cx !== 'number' || typeof cy !== 'number') {
+        return null;
+    }
+
+    const fillColor = useMemo(() => {
+        console.log(payload)
+        if (glucoseValue < targetLow) return "var(--chart-3)"
+        if (glucoseValue > targetHigh) return "var(--chart-1)"
+        return "var(--chart-2)"
+    }, [glucoseValue, targetLow, targetHigh])
+
+    return <Dot cx={cx} cy={cy} r={6} fill={fillColor} stroke="#fff" strokeWidth={1} />;
+};
+
+export default CustomizedDot;

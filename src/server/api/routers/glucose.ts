@@ -1,8 +1,9 @@
 import { desc, eq } from "drizzle-orm";
 import { handleTRPCError } from "~/lib/errors";
 import { glucoseFormSchema } from "~/schemas/logs";
-import { glucoseLog } from "~/server/db/schema";
+import { glucose_target, glucoseLog } from "~/server/db/schema";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { glucoseTargetSchema } from "~/schemas/targets";
 
 export const glucoseRouter = createTRPCRouter({
     create: protectedProcedure.input(glucoseFormSchema).mutation(async ({ ctx: { db, auth }, input }) => {
@@ -39,6 +40,28 @@ export const glucoseRouter = createTRPCRouter({
                 glucose: glucoseLog.glucose,
                 date: glucoseLog.date,
             }).from(glucoseLog).where(eq(glucoseLog.userId, auth.user.id)).orderBy(desc(glucoseLog.date)).limit(1).offset(0)
+        } catch (error) {
+            handleTRPCError(error)
+        }
+    }),
+    getTargets: protectedProcedure.query(async ({ ctx: { db, auth } }) => {
+        try {
+        return await db.select().from(glucose_target).where(eq(glucose_target.userId, auth.user.id))
+        } catch (error) {
+            handleTRPCError(error)
+        }
+    }),
+    setTargets: protectedProcedure.input(glucoseTargetSchema).mutation(async ({ ctx: { db, auth }, input }) => {
+        try {
+            await db.insert(glucose_target).values({
+                ...input,
+                userId: auth.user.id,
+            })
+
+            return {
+                success: true,
+                message: "Targets set successfully"
+            }
         } catch (error) {
             handleTRPCError(error)
         }

@@ -14,6 +14,7 @@ const chartConfig = {
 
 const DashboardPage = async () => {
   const glucoseLogs = await api.glucose.getLogs()
+  const glucoseTargets = await api.glucose.getTargets()
 
   return (
     <div className="px-4 sm:px-6 lg:px-8">
@@ -28,7 +29,7 @@ const DashboardPage = async () => {
           <LastGlucoseLog />
           <LastMedicationLog />
         </div>
-        <GlucoseHistoryChart className="lg:col-span-2 h-full" glucoseLogs={glucoseLogs} chartConfig={chartConfig} />
+        <GlucoseHistoryChart className="lg:col-span-2 h-full" glucoseLogs={glucoseLogs} chartConfig={chartConfig} glucoseTargets={glucoseTargets} />
       </div>
     </div>
   )

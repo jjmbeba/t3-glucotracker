@@ -56,6 +56,7 @@ const GlucoseHistorySkeleton = () => {
 }
 
 const GlucoseHistory = ({ timePeriod }: { timePeriod: string }) => {
+    const { data: glucoseTargets, isLoading: isGlucoseTargetsLoading, error: glucoseTargetsError } = api.glucose.getTargets.useQuery()
     const { data, isLoading: isGlucoseLogsLoading, error } = api.glucose.getLogs.useQuery()
 
     const [glucoseLogs, setGlucoseLogs] = useState<GetGlucoseLogsOutput>([])
@@ -78,9 +79,14 @@ const GlucoseHistory = ({ timePeriod }: { timePeriod: string }) => {
         console.error(error)
     }
 
+    if (glucoseTargetsError) {
+        toast.error("Error fetching glucose targets")
+        console.error(glucoseTargetsError)
+    }
+
     const timePeriodLabel = timePeriod === "lastWeek" ? "Last week" : timePeriod === "lastMonth" ? "Last month" : null
 
-    if (isGlucoseLogsLoading) {
+    if (isGlucoseLogsLoading || isGlucoseTargetsLoading) {
         return <GlucoseHistorySkeleton />
     }
 
@@ -107,10 +113,10 @@ const GlucoseHistory = ({ timePeriod }: { timePeriod: string }) => {
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
                 <div className="lg:col-span-1">
-                    <GlucoseHistoryChart className="mt-2" glucoseLogs={glucoseLogs ?? []} chartConfig={chartConfig} />
+                    <GlucoseHistoryChart className="mt-2" glucoseLogs={glucoseLogs ?? []} glucoseTargets={glucoseTargets ?? []} chartConfig={chartConfig} />
                 </div>
                 <div className="lg:col-span-1">
-                    <GlucoseDistributionChart glucoseLogs={glucoseLogs ?? []} chartConfig={chartConfig} />
+                    <GlucoseDistributionChart glucoseLogs={glucoseLogs ?? []} glucoseTargets={glucoseTargets ?? []} chartConfig={chartConfig} />
                 </div>
                 <div className="lg:col-span-1">
                     <GlucosePieChart glucoseLogs={glucoseLogs ?? []} />
