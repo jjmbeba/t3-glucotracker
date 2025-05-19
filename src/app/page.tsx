@@ -35,11 +35,11 @@ export default async function Home() {
 					<div className="flex flex-col gap-4 text-center">
 						<div className="flex items-center justify-center gap-2">
 							<Droplet className="w-8 h-8 text-primary" />
-							<h1 className="font-bold text-4xl md:text-5xl text-black dark:text-white">
+							<h1 className="font-bold text-3xl md:text-5xl text-black dark:text-white">
 								GlucoTrack
 							</h1>
 						</div>
-						<p className="text-lg md:text-xl text-muted-foreground max-w-2xl">
+						<p className="text-base md:text-lg text-muted-foreground max-w-2xl">
 							Your comprehensive diabetes management companion. Track, analyze, and take control of your health journey.
 						</p>
 					</div>
@@ -54,7 +54,7 @@ export default async function Home() {
 									</div>
 								</CardHeader>
 								<CardContent>
-									<CardDescription className="text-base">
+									<CardDescription className="text-sm">
 										{feature.description}
 									</CardDescription>
 								</CardContent>
