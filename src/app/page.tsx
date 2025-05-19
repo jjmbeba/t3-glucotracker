@@ -1,64 +1,74 @@
 import { Suspense } from "react";
 import { HydrateClient } from "~/trpc/server";
 import { SignInButton } from "../components/auth/sign-in-button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
+import { Droplet, LineChart, Clock, Pill } from "lucide-react";
 
 export default async function Home() {
 	const features = [
-		"Email & Password",
-		"Organization | Teams",
-		"Passkeys",
-		"Multi Factor",
-		"Password Reset",
-		"Email Verification",
-		"Roles & Permissions",
-		"Rate Limiting",
-		"Session Management",
+		{
+			title: "Glucose Tracking",
+			description: "Monitor your blood glucose levels with detailed logs and trends",
+			icon: Droplet,
+		},
+		{
+			title: "Meal Logging",
+			description: "Track your meals and their impact on your glucose levels",
+			icon: Clock,
+		},
+		{
+			title: "Medication Management",
+			description: "Keep track of your medications and their schedules",
+			icon: Pill,
+		},
+		{
+			title: "Analytics & Reports",
+			description: "Get insights into your glucose patterns and trends",
+			icon: LineChart,
+		},
 	];
 
 	return (
 		<HydrateClient>
-			<div className="min-h-[80vh] flex items-center justify-center overflow-hidden no-visible-scrollbar px-6 md:px-0">
-				<main className="flex flex-col gap-4 row-start-2 items-center justify-center">
-					<div className="flex flex-col gap-1">
-						<h3 className="font-bold text-4xl text-black dark:text-white text-center">
-							GlucoTrack
-						</h3>
-						<p className="text-center break-words text-sm md:text-base">
-							Official demo to showcase{" "}
-							<a
-								href="https://better-auth.com"
-								target="_blank"
-								className="italic underline"
-							>
-								better-auth.
-							</a>{" "}
-							features and capabilities. <br />
+			<div className="min-h-screen flex items-center justify-center py-12 px-6 md:px-0">
+				<main className="flex flex-col gap-8 items-center justify-center max-w-4xl w-full">
+					<div className="flex flex-col gap-4 text-center">
+						<div className="flex items-center justify-center gap-2">
+							<Droplet className="w-8 h-8 text-primary" />
+							<h1 className="font-bold text-4xl md:text-5xl text-black dark:text-white">
+								GlucoTrack
+							</h1>
+						</div>
+						<p className="text-lg md:text-xl text-muted-foreground max-w-2xl">
+							Your comprehensive diabetes management companion. Track, analyze, and take control of your health journey.
 						</p>
 					</div>
-					<div className="md:w-10/12 w-full flex flex-col gap-4">
-						<div className="flex flex-col gap-3 pt-2 flex-wrap">
-							<div className="border-y py-2 border-dotted bg-secondary/60 opacity-80">
-								<div className="text-xs flex items-center gap-2 justify-center text-muted-foreground ">
-									<span className="text-center">
-										All features on this demo are implemented with Better Auth
-										without any custom backend code
-									</span>
-								</div>
-							</div>
-							<div className="flex gap-2 justify-center flex-wrap">
-								{features.map((feature) => (
-									<span
-										className="border-b pb-1 text-muted-foreground text-xs cursor-pointer hover:text-foreground duration-150 ease-in-out transition-all hover:border-foreground flex items-center gap-1"
-										key={feature}
-									>
-										{feature}.
-									</span>
-								))}
-							</div>
-						</div>
+
+					<div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full">
+						{features.map((feature) => (
+							<Card key={feature.title} className="hover:shadow-lg transition-shadow">
+								<CardHeader>
+									<div className="flex items-center gap-2">
+										<feature.icon className="w-5 h-5 text-primary" />
+										<CardTitle>{feature.title}</CardTitle>
+									</div>
+								</CardHeader>
+								<CardContent>
+									<CardDescription className="text-base">
+										{feature.description}
+									</CardDescription>
+								</CardContent>
+							</Card>
+						))}
+					</div>
+
+					<div className="flex flex-col items-center gap-4 pt-4">
 						<Suspense fallback={<p>Loading...</p>}>
 							<SignInButton />
 						</Suspense>
+						<p className="text-sm text-muted-foreground text-center">
+							Join thousands of users managing their diabetes with confidence
+						</p>
 					</div>
 				</main>
 			</div>
