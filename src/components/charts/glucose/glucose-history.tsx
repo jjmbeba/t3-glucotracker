@@ -1,7 +1,7 @@
 'use client'
 
 import dayjs from "dayjs"
-import { CartesianGrid, Line, LineChart, XAxis, ReferenceLine } from "recharts"
+import { CartesianGrid, Line, LineChart, ReferenceLine, XAxis } from "recharts"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card"
 import { type ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent } from "~/components/ui/chart"
 import { cn } from "~/lib/utils"
@@ -9,12 +9,14 @@ import type { GetGlucoseLogsOutput, GetGlucoseTargetsOutput } from "~/trpc/react
 
 type GlucoseHistoryChartProps = {
     glucoseLogs: GetGlucoseLogsOutput,
-    glucoseTargets: GetGlucoseTargetsOutput,
+    glucoseTarget: GetGlucoseTargetsOutput[number] | null,
     chartConfig: ChartConfig,
     className?: string
 }
 
-export const GlucoseHistoryChart = ({ glucoseLogs, chartConfig, glucoseTargets, className }: GlucoseHistoryChartProps) => {
+export const GlucoseHistoryChart = ({ glucoseLogs, chartConfig, glucoseTarget, className }: GlucoseHistoryChartProps) => {
+    console.log("glucoseTarget", glucoseTarget && glucoseTarget.lowThreshold)
+
     return (
         <Card className={cn(className)}>
             <CardHeader>
@@ -39,12 +41,8 @@ export const GlucoseHistoryChart = ({ glucoseLogs, chartConfig, glucoseTargets, 
                             }}
                         >
                             <CartesianGrid vertical={false} />
-                            {glucoseTargets.map(target => (
-                                <ReferenceLine y={target.lowThreshold} stroke="var(--chart-3)" strokeDasharray={"3 3"} strokeWidth={2} label={{ value: "Low threshold", position: "top" }} />
-                            ))}
-                            {glucoseTargets.map(target => (
-                                <ReferenceLine y={target.highThreshold} stroke="var(--chart-1)" strokeDasharray={"3 3"} strokeWidth={2} label={{ value: "High threshold", position: "top" }} />
-                            ))}
+                            {glucoseTarget && <ReferenceLine y={glucoseTarget.lowThreshold} stroke="var(--chart-3)" strokeDasharray={"3 3"} strokeWidth={2} label={{ value: "Low threshold", position: "top" }} />}
+                            {glucoseTarget && <ReferenceLine y={glucoseTarget.highThreshold} stroke="var(--chart-1)" strokeDasharray={"3 3"} strokeWidth={2} label={{ value: "High threshold", position: "top" }} />}
                             <XAxis
                                 dataKey="date"
                                 tickLine={false}

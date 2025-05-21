@@ -1,9 +1,10 @@
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { handleTRPCError } from "~/lib/errors";
 import { glucoseFormSchema } from "~/schemas/logs";
 import { glucose_target, glucoseLog } from "~/server/db/schema";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { glucoseTargetSchema } from "~/schemas/targets";
+import { glucoseTargetSchema, glucoseTargetUpdateSchema } from "~/schemas/targets";
+import { z } from "zod";
 
 export const glucoseRouter = createTRPCRouter({
     create: protectedProcedure.input(glucoseFormSchema).mutation(async ({ ctx: { db, auth }, input }) => {
@@ -61,6 +62,42 @@ export const glucoseRouter = createTRPCRouter({
             return {
                 success: true,
                 message: "Targets set successfully"
+            }
+        } catch (error) {
+            handleTRPCError(error)
+        }
+    }),
+    deleteTarget: protectedProcedure.input(z.number()).mutation(async ({ ctx: { db, auth }, input }) => {
+        try {
+            await db.delete(glucose_target).where(
+                and(
+                    eq(glucose_target.id, input),
+                    eq(glucose_target.userId, auth.user.id)
+                )
+            )
+
+            return {
+                success: true,
+                message: "Target deleted successfully"
+            }
+        } catch (error) {
+            handleTRPCError(error)
+        }
+    }),
+    updateTarget: protectedProcedure.input(glucoseTargetUpdateSchema).mutation(async ({ ctx: { db, auth }, input }) => {
+        try {
+            await db.update(glucose_target).set({
+                ...input,
+            }).where(
+                and(
+                    eq(glucose_target.id, input.id),
+                    eq(glucose_target.userId, auth.user.id)
+                )
+            )
+
+            return {
+                success: true,
+                message: "Target updated successfully"
             }
         } catch (error) {
             handleTRPCError(error)

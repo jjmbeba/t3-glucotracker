@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const glucoseTargetSchema = z.object({
+export const glucoseBaseSchema = z.object({
     targetName: z.string().min(1, {
         message: 'Target name must be at least 1 character'
     }),
@@ -17,9 +17,15 @@ export const glucoseTargetSchema = z.object({
     units: z.enum(['mg/dL', 'mmol/L'], {
         message: 'Units must be either mg/dL or mmol/L'
     }),
-}).refine((data) => {
+})
+
+export const glucoseTargetSchema = glucoseBaseSchema.refine((data) => {
     return data.lowThreshold < data.highThreshold
 }, {
     message: 'Low threshold must be less than high threshold',
     path: ['lowThreshold', 'highThreshold']
+})
+
+export const glucoseTargetUpdateSchema = glucoseBaseSchema.extend({
+    id: z.number()
 })

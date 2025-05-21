@@ -1,9 +1,26 @@
 "use client"
 
+import { useQueryClient } from "@tanstack/react-query"
 import { type ColumnDef } from "@tanstack/react-table"
-import { ArrowUpDown, MoreHorizontal } from "lucide-react"
-import { Button } from "~/components/ui/button"
+import { getQueryKey } from "@trpc/react-query"
+import { ArrowUpDown, Loader2, MoreHorizontal } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
+import { toast } from "sonner"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "~/components/ui/alert-dialog"
+import { Button, buttonVariants } from "~/components/ui/button"
 import { Checkbox } from "~/components/ui/checkbox"
+import { Dialog, DialogTitle, DialogHeader, DialogContent, DialogTrigger } from "~/components/ui/dialog"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -12,10 +29,10 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu"
-import { type GetGlucoseTargetsOutput } from "~/trpc/react"
+import { cn } from "~/lib/utils"
+import { api, type GetGlucoseTargetsOutput } from "~/trpc/react"
+import GlucoseTargetForm from "../forms/glucose"
 
-// This type is used to define the shape of our data.
-// You can use a Zod schema here if you want.
 
 export const glucoseTargetsColumns: ColumnDef<GetGlucoseTargetsOutput[number]>[] = [
     {
@@ -71,21 +88,82 @@ export const glucoseTargetsColumns: ColumnDef<GetGlucoseTargetsOutput[number]>[]
         cell: ({ row }) => {
             const target = row.original
 
+            const queryClient = useQueryClient()
+            const targetsKey = getQueryKey(api.glucose.getTargets, undefined, 'query')
+            const router = useRouter()
+            const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+            
+
+            const { mutate: deleteTarget, isPending } = api.glucose.deleteTarget.useMutation({
+                onSuccess: () => {
+                    toast.success("Target deleted successfully")
+                },
+                onError: (error) => {
+                    toast.error(error.message)
+                    console.error(error)
+                },
+                onSettled: () => {
+                    queryClient.invalidateQueries({ queryKey: targetsKey })
+                    router.refresh()
+                }
+            })
+
             return (
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>Update target</DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive">Delete target</DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                <div>
+                    <Dialog>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="h-8 w-8 p-0">
+                                    <span className="sr-only">Open menu</span>
+                                    <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DialogTrigger asChild>
+                                    <DropdownMenuItem>Update target</DropdownMenuItem>
+                                </DialogTrigger>
+                                <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                                    <AlertDialogTrigger asChild>
+                                        <DropdownMenuItem onSelect={(e) => {
+                                            e.preventDefault()
+                                            setIsDeleteDialogOpen(true)
+                                        }} className="text-destructive">Delete target</DropdownMenuItem>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                This action cannot be undone. This will permanently delete the glucose target.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel type="button">Cancel</AlertDialogCancel>
+                                            <AlertDialogAction className={cn(buttonVariants({ variant: "destructive" }))} disabled={isPending} onClick={() =>{
+                                                 deleteTarget(target.id)
+                                                 setIsDeleteDialogOpen(false)
+                                            }}>
+                                                {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Delete"}
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Update target</DialogTitle>
+                            </DialogHeader>
+                            <GlucoseTargetForm defaultValues={
+                                {
+                                    ...target,
+                                    units: target.units as 'mg/dL' | 'mmol/L'
+                                }
+                            } type="update" id={target.id} />
+                        </DialogContent>
+                    </Dialog>
+                </div>
             )
         },
     },

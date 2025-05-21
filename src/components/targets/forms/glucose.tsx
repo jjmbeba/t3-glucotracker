@@ -4,7 +4,9 @@ import { useForm } from '@tanstack/react-form'
 import { useQueryClient } from '@tanstack/react-query'
 import { getQueryKey } from '@trpc/react-query'
 import { InfoIcon, Loader2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import type { z } from 'zod'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
@@ -12,32 +14,69 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~
 import { glucoseTargetSchema } from '~/schemas/targets'
 import { api } from '~/trpc/react'
 
-const GlucoseTargetForm = () => {
-    const queryClient = useQueryClient()
+type CreateProps = {
+    type: 'create',
+}
 
+type UpdateProps = {
+    type: 'update',
+    id: number,
+    defaultValues: z.infer<typeof glucoseTargetSchema>
+}
+
+type Props = CreateProps | UpdateProps
+
+const GlucoseTargetForm = ({ type, ...props }: Props) => {
+    const queryClient = useQueryClient()
     const targetsKey = getQueryKey(api.glucose.getTargets, undefined, 'query')
+    const router = useRouter()
 
     const { mutate: setTargets, isPending: isSetTargetsPending } = api.glucose.setTargets.useMutation({
         onSuccess: () => {
             toast.success('Targets set successfully')
-            queryClient.invalidateQueries({ queryKey: targetsKey })
             form.reset()
         },
         onError: (error) => {
             toast.error(error.message)
             console.error(error)
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: targetsKey })
+            router.refresh()
+        }
+    })
+
+    const { mutate: updateTarget, isPending: isUpdateTargetPending } = api.glucose.updateTarget.useMutation({
+        onSuccess: () => {
+            toast.success('Target updated successfully')
+            form.reset()
+        },
+        onError: (error) => {
+            toast.error(error.message)
+            console.error(error)
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: targetsKey })
+            router.refresh()
         }
     })
 
     const form = useForm({
-        defaultValues: {
+        defaultValues: type === 'update' && 'defaultValues' in props ? glucoseTargetSchema.parse(props.defaultValues) : {
             targetName: 'Default',
             lowThreshold: 80,
             highThreshold: 140,
             units: 'mg/dL' as 'mg/dL' | 'mmol/L',
         },
         onSubmit: ({ value }) => {
-            setTargets(value)
+            if (type === 'create') {
+                setTargets(value)
+            } else {
+                updateTarget({
+                    ...value,
+                    id: 'id' in props ? props.id : 0
+                })
+            }
         },
         validators: {
             onChange: glucoseTargetSchema
@@ -127,8 +166,8 @@ const GlucoseTargetForm = () => {
                         name="units"
                         children={(field) => (
                             <>
-                                <Select 
-                                    onValueChange={(value) => field.handleChange(value as 'mg/dL' | 'mmol/L')} 
+                                <Select
+                                    onValueChange={(value) => field.handleChange(value as 'mg/dL' | 'mmol/L')}
                                     defaultValue={field.state.value}
                                 >
                                     <SelectTrigger className='w-full'>
@@ -164,8 +203,8 @@ const GlucoseTargetForm = () => {
                     selector={(state) => [state.canSubmit, state.isSubmitting]}
                     children={([canSubmit, isSubmitting]) => (
                         <div className='flex gap-2'>
-                            <Button type='submit' disabled={!canSubmit || isSubmitting || isSetTargetsPending}>
-                                {isSubmitting || isSetTargetsPending ? <Loader2 className='size-4 animate-spin' /> : 'Save'}
+                            <Button type='submit' disabled={!canSubmit || isSubmitting || isSetTargetsPending || isUpdateTargetPending}>
+                                {isSubmitting || isSetTargetsPending || isUpdateTargetPending ? <Loader2 className='size-4 animate-spin' /> : 'Save'}
                             </Button>
                         </div>
                     )}
