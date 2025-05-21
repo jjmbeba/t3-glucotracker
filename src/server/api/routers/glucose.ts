@@ -94,6 +94,11 @@ export const glucoseRouter = createTRPCRouter({
                     eq(glucose_target.userId, auth.user.id)
                 )
             )
+
+            return {
+                success: true,
+                message: "Target updated successfully"
+            }
         } catch (error) {
             handleTRPCError(error)
         }

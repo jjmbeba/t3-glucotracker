@@ -6,6 +6,7 @@ import { getQueryKey } from '@trpc/react-query'
 import { InfoIcon, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import type { z } from 'zod'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
@@ -13,18 +14,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~
 import { glucoseTargetSchema } from '~/schemas/targets'
 import { api } from '~/trpc/react'
 
-type Props = {
-    defaultValues?: {
-        targetName?: string
-        lowThreshold?: number
-        highThreshold?: number
-        units?: 'mg/dL' | 'mmol/L'
-    },
-    type: 'create' | 'update',
-    id?: number
+type CreateProps = {
+    type: 'create',
 }
 
-const GlucoseTargetForm = ({ defaultValues, type, id }: Props) => {
+type UpdateProps = {
+    type: 'update',
+    id: number,
+    defaultValues: z.infer<typeof glucoseTargetSchema>
+}
+
+type Props = CreateProps | UpdateProps
+
+const GlucoseTargetForm = ({ type, ...props }: Props) => {
     const queryClient = useQueryClient()
     const targetsKey = getQueryKey(api.glucose.getTargets, undefined, 'query')
     const router = useRouter()
@@ -60,7 +62,7 @@ const GlucoseTargetForm = ({ defaultValues, type, id }: Props) => {
     })
 
     const form = useForm({
-        defaultValues: defaultValues ? glucoseTargetSchema.parse(defaultValues) : {
+        defaultValues: type === 'update' && 'defaultValues' in props ? glucoseTargetSchema.parse(props.defaultValues) : {
             targetName: 'Default',
             lowThreshold: 80,
             highThreshold: 140,
@@ -72,7 +74,7 @@ const GlucoseTargetForm = ({ defaultValues, type, id }: Props) => {
             } else {
                 updateTarget({
                     ...value,
-                    id: id as number
+                    id: 'id' in props ? props.id : 0
                 })
             }
         },
@@ -164,8 +166,8 @@ const GlucoseTargetForm = ({ defaultValues, type, id }: Props) => {
                         name="units"
                         children={(field) => (
                             <>
-                                <Select 
-                                    onValueChange={(value) => field.handleChange(value as 'mg/dL' | 'mmol/L')} 
+                                <Select
+                                    onValueChange={(value) => field.handleChange(value as 'mg/dL' | 'mmol/L')}
                                     defaultValue={field.state.value}
                                 >
                                     <SelectTrigger className='w-full'>
