@@ -23,3 +23,11 @@ export function removeSearchParam(pathname: string, param: string) {
   urlObj.searchParams.delete(param)
   return urlObj.pathname + urlObj.search
 }
+
+export function constructNewUrl(pathname: string, params: Record<string, string>) {
+  const urlObj = new URL(`${process.env.NEXT_PUBLIC_APP_URL}${pathname}`)
+  Object.entries(params).forEach(([key, value]) => {
+    urlObj.searchParams.set(key, value)
+  })
+  return urlObj.pathname + urlObj.search
+}

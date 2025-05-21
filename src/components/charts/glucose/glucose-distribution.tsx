@@ -22,9 +22,9 @@ export interface CustomizedDotProps {
     targetHigh: number;
 }
 
-export const GlucoseDistributionChart = ({ glucoseLogs, glucoseTargets, chartConfig }: { glucoseLogs: GetGlucoseLogsOutput, glucoseTargets: GetGlucoseTargetsOutput, chartConfig: ChartConfig }) => {
-    const lowThreshold = glucoseTargets[0]?.lowThreshold ?? 0
-    const highThreshold = glucoseTargets[0]?.highThreshold ?? 0
+export const GlucoseDistributionChart = ({ glucoseLogs, glucoseTarget, chartConfig }: { glucoseLogs: GetGlucoseLogsOutput, glucoseTarget: GetGlucoseTargetsOutput[number] | null, chartConfig: ChartConfig }) => {
+    const lowThreshold = glucoseTarget?.lowThreshold ?? 0
+    const highThreshold = glucoseTarget?.highThreshold ?? 0
 
     return (
         <div>
@@ -94,7 +94,6 @@ const CustomizedDot: React.FC<CustomizedDotProps> = (props) => {
     }
 
     const fillColor = useMemo(() => {
-        console.log(payload)
         if (glucoseValue < targetLow) return "var(--chart-3)"
         if (glucoseValue > targetHigh) return "var(--chart-1)"
         return "var(--chart-2)"
