@@ -4,6 +4,7 @@ import { useForm } from '@tanstack/react-form'
 import { useQueryClient } from '@tanstack/react-query'
 import { getQueryKey } from '@trpc/react-query'
 import { InfoIcon, Loader2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Button } from '~/components/ui/button'
 import { Input } from '~/components/ui/input'
@@ -14,18 +15,21 @@ import { api } from '~/trpc/react'
 
 const GlucoseTargetForm = () => {
     const queryClient = useQueryClient()
-
     const targetsKey = getQueryKey(api.glucose.getTargets, undefined, 'query')
+    const router = useRouter()
 
     const { mutate: setTargets, isPending: isSetTargetsPending } = api.glucose.setTargets.useMutation({
         onSuccess: () => {
             toast.success('Targets set successfully')
-            queryClient.invalidateQueries({ queryKey: targetsKey })
             form.reset()
         },
         onError: (error) => {
             toast.error(error.message)
             console.error(error)
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: targetsKey })
+            router.refresh()
         }
     })
 

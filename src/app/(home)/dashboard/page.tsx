@@ -3,6 +3,7 @@ import { GlucoseHistoryChart } from '~/components/charts/glucose/glucose-history
 import QuickAddButton from '~/components/common/quick-add-button'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import type { ChartConfig } from '~/components/ui/chart'
+import type { GetGlucoseLogsOutput, GetGlucoseTargetsOutput } from '~/trpc/react'
 import { api } from '~/trpc/server'
 
 const chartConfig = {
@@ -13,8 +14,15 @@ const chartConfig = {
 } satisfies ChartConfig
 
 const DashboardPage = async () => {
-  const glucoseLogs = await api.glucose.getLogs()
-  const glucoseTargets = await api.glucose.getTargets()
+  let glucoseLogs: GetGlucoseLogsOutput = []
+  let glucoseTargets: GetGlucoseTargetsOutput = []
+
+  try {
+    glucoseLogs = await api.glucose.getLogs()
+    glucoseTargets = await api.glucose.getTargets()
+  } catch (error) {
+    console.error(error)
+  }
 
   return (
     <div className="px-4 sm:px-6 lg:px-8">
@@ -29,7 +37,7 @@ const DashboardPage = async () => {
           <LastGlucoseLog />
           <LastMedicationLog />
         </div>
-        <GlucoseHistoryChart className="lg:col-span-2 h-full" glucoseLogs={glucoseLogs} chartConfig={chartConfig} glucoseTargets={glucoseTargets} />
+        <GlucoseHistoryChart className="lg:col-span-2 h-full" glucoseLogs={glucoseLogs} chartConfig={chartConfig} glucoseTarget={glucoseTargets[0] ?? null} />
       </div>
     </div>
   )
