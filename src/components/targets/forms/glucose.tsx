@@ -13,7 +13,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~
 import { glucoseTargetSchema } from '~/schemas/targets'
 import { api } from '~/trpc/react'
 
-const GlucoseTargetForm = () => {
+type Props = {
+    defaultValues?: {
+        targetName?: string
+        lowThreshold?: number
+        highThreshold?: number
+        units?: 'mg/dL' | 'mmol/L'
+    },
+    type: 'create' | 'update',
+    id?: number
+}
+
+const GlucoseTargetForm = ({ defaultValues, type, id }: Props) => {
     const queryClient = useQueryClient()
     const targetsKey = getQueryKey(api.glucose.getTargets, undefined, 'query')
     const router = useRouter()
@@ -33,15 +44,37 @@ const GlucoseTargetForm = () => {
         }
     })
 
+    const { mutate: updateTarget, isPending: isUpdateTargetPending } = api.glucose.updateTarget.useMutation({
+        onSuccess: () => {
+            toast.success('Target updated successfully')
+            form.reset()
+        },
+        onError: (error) => {
+            toast.error(error.message)
+            console.error(error)
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({ queryKey: targetsKey })
+            router.refresh()
+        }
+    })
+
     const form = useForm({
-        defaultValues: {
+        defaultValues: defaultValues ? glucoseTargetSchema.parse(defaultValues) : {
             targetName: 'Default',
             lowThreshold: 80,
             highThreshold: 140,
             units: 'mg/dL' as 'mg/dL' | 'mmol/L',
         },
         onSubmit: ({ value }) => {
-            setTargets(value)
+            if (type === 'create') {
+                setTargets(value)
+            } else {
+                updateTarget({
+                    ...value,
+                    id: id as number
+                })
+            }
         },
         validators: {
             onChange: glucoseTargetSchema
@@ -168,8 +201,8 @@ const GlucoseTargetForm = () => {
                     selector={(state) => [state.canSubmit, state.isSubmitting]}
                     children={([canSubmit, isSubmitting]) => (
                         <div className='flex gap-2'>
-                            <Button type='submit' disabled={!canSubmit || isSubmitting || isSetTargetsPending}>
-                                {isSubmitting || isSetTargetsPending ? <Loader2 className='size-4 animate-spin' /> : 'Save'}
+                            <Button type='submit' disabled={!canSubmit || isSubmitting || isSetTargetsPending || isUpdateTargetPending}>
+                                {isSubmitting || isSetTargetsPending || isUpdateTargetPending ? <Loader2 className='size-4 animate-spin' /> : 'Save'}
                             </Button>
                         </div>
                     )}

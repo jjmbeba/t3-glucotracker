@@ -5,6 +5,7 @@ import { type ColumnDef } from "@tanstack/react-table"
 import { getQueryKey } from "@trpc/react-query"
 import { ArrowUpDown, Loader2, MoreHorizontal } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useState } from "react"
 import { toast } from "sonner"
 import {
     AlertDialog,
@@ -17,8 +18,9 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "~/components/ui/alert-dialog"
-import { Button } from "~/components/ui/button"
+import { Button, buttonVariants } from "~/components/ui/button"
 import { Checkbox } from "~/components/ui/checkbox"
+import { Dialog, DialogTitle, DialogHeader, DialogContent, DialogTrigger } from "~/components/ui/dialog"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -27,7 +29,9 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu"
+import { cn } from "~/lib/utils"
 import { api, type GetGlucoseTargetsOutput } from "~/trpc/react"
+import GlucoseTargetForm from "../forms/glucose"
 
 
 export const glucoseTargetsColumns: ColumnDef<GetGlucoseTargetsOutput[number]>[] = [
@@ -87,6 +91,8 @@ export const glucoseTargetsColumns: ColumnDef<GetGlucoseTargetsOutput[number]>[]
             const queryClient = useQueryClient()
             const targetsKey = getQueryKey(api.glucose.getTargets, undefined, 'query')
             const router = useRouter()
+            const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+            
 
             const { mutate: deleteTarget, isPending } = api.glucose.deleteTarget.useMutation({
                 onSuccess: () => {
@@ -103,38 +109,61 @@ export const glucoseTargetsColumns: ColumnDef<GetGlucoseTargetsOutput[number]>[]
             })
 
             return (
-                <AlertDialog>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                                <span className="sr-only">Open menu</span>
-                                <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem>Update target</DropdownMenuItem>
-                            <AlertDialogTrigger asChild>
-                                <DropdownMenuItem className="text-destructive">Delete target</DropdownMenuItem>
-                            </AlertDialogTrigger>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                            <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete the glucose target.
-                            </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction disabled={isPending} onClick={() => deleteTarget(target.id)}>
-                                {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Delete"}
-                            </AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
+                <div>
+                    <Dialog>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="h-8 w-8 p-0">
+                                    <span className="sr-only">Open menu</span>
+                                    <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DialogTrigger asChild>
+                                    <DropdownMenuItem>Update target</DropdownMenuItem>
+                                </DialogTrigger>
+                                <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                                    <AlertDialogTrigger asChild>
+                                        <DropdownMenuItem onSelect={(e) => {
+                                            e.preventDefault()
+                                            setIsDeleteDialogOpen(true)
+                                        }} className="text-destructive">Delete target</DropdownMenuItem>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                This action cannot be undone. This will permanently delete the glucose target.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel type="button">Cancel</AlertDialogCancel>
+                                            <AlertDialogAction className={cn(buttonVariants({ variant: "destructive" }))} disabled={isPending} onClick={() =>{
+                                                 deleteTarget(target.id)
+                                                 setIsDeleteDialogOpen(false)
+                                            }}>
+                                                {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Delete"}
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Update target</DialogTitle>
+                            </DialogHeader>
+                            <GlucoseTargetForm defaultValues={
+                                {
+                                    ...target,
+                                    units: target.units as 'mg/dL' | 'mmol/L'
+                                }
+                            } type="update" id={target.id} />
+                        </DialogContent>
+                    </Dialog>
+                </div>
             )
         },
     },
