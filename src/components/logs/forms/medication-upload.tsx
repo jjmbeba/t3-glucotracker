@@ -2,14 +2,16 @@
 
 import { useForm, useStore } from '@tanstack/react-form';
 import { Info, Loader2 } from 'lucide-react';
+import Link from 'next/link';
 import { useEffect } from 'react';
 import { toast } from 'sonner';
-import { Button } from '~/components/ui/button';
+import { Button, buttonVariants } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 import { Label } from '~/components/ui/label';
 import { Select, SelectContent, SelectValue, SelectTrigger, SelectItem } from '~/components/ui/select';
 import { Textarea } from '~/components/ui/textarea';
 import { doseUnits } from '~/constants';
+import { cn } from '~/lib/utils';
 import { medicationUploadSchema } from '~/schemas/medication';
 import { api } from '~/trpc/react';
 
@@ -33,7 +35,7 @@ const MedicationUploadForm = () => {
 
     const form = useForm({
         defaultValues: {
-            medicationId:  0,
+            medicationId: 0,
             dosageAmountTaken: 0,
             dosageUnitTaken: doseUnits[0] ?? "",
             notes: ""
@@ -65,8 +67,10 @@ const MedicationUploadForm = () => {
     if (medicationSetup?.length === 0) {
         return <div className='min-h-[70vh] flex items-center justify-center'>
             <div className=' flex items-start justify-center gap-4 max-w-lg text-center'>
-                <Info className='size-5' />
-                No medication setup found. Please create a medication setup first in the setup tab.
+                <Info className='size-6' />
+                <span className='text-sm'>
+                    No medication setup found. Please create a medication setup first in the <Link className={cn(buttonVariants({ variant: "link" }))} href="/settings/medication-management">Medication Management page</Link>.
+                </span>
             </div>
         </div>
     }
