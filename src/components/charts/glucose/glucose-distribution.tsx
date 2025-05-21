@@ -101,5 +101,3 @@ const CustomizedDot: React.FC<CustomizedDotProps> = (props) => {
 
     return <Dot cx={cx} cy={cy} r={6} fill={fillColor} stroke="#fff" strokeWidth={1} />;
 };
-
-export default CustomizedDot;
