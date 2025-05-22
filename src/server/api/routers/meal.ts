@@ -52,15 +52,18 @@ export const mealRouter = createTRPCRouter({
     updateLog: protectedProcedure.input(mealUpdateSchema).mutation(async ({ ctx: { db, auth }, input }) => {
         try {
             await db.update(meal_log).set({
-                ...input,
+                mealDescription: input.mealDescription,
+                mealType: input.mealType,
                 mealDate: new Date(input.mealDate),
+                estimatedCarbs: input.estimatedCarbs,
+                notes: input.notes ?? null,
             }).where(
                 and(
                     eq(meal_log.id, input.id),
                     eq(meal_log.userId, auth.user.id)
                 )
             )
-            
+
             return {
                 success: true,
                 message: "Meal log updated successfully"
