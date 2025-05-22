@@ -1,11 +1,9 @@
-import React from 'react'
-import { HydrateClient } from '~/trpc/server'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
-import MealUpload from '~/components/logs/forms/meal-upload'
-import type { GetMealLogsOutput } from '~/trpc/react'
-import { api } from '~/trpc/server'
+import MealLogForm from '~/components/logs/forms/meal-upload'
 import { mealLogColumns } from '~/components/targets/columns/meal-logs-columns'
 import { DataTable } from '~/components/ui/data-table'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
+import type { GetMealLogsOutput } from '~/trpc/react'
+import { api, HydrateClient } from '~/trpc/server'
 
 const Page = async () => {
     let mealLogs: GetMealLogsOutput = []
@@ -31,7 +29,7 @@ const Page = async () => {
                         </div>
                     </TabsContent>
                     <TabsContent value="upload">
-                        <MealUpload />
+                        <MealLogForm type="create" />
                     </TabsContent>
                 </Tabs>
             </div>

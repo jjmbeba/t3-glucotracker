@@ -1,6 +1,6 @@
 import { and, eq } from "drizzle-orm";
 import { handleTRPCError } from "~/lib/errors";
-import { mealUploadSchema } from "~/schemas/meal";
+import { mealUpdateSchema, mealUploadSchema } from "~/schemas/meal";
 import { meal_log } from "~/server/db/schema";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { z } from "zod";
@@ -44,6 +44,26 @@ export const mealRouter = createTRPCRouter({
             return {
                 success: true,
                 message: "Meal log deleted successfully"
+            }
+        } catch (error) {
+            handleTRPCError(error)
+        }
+    }),
+    updateLog: protectedProcedure.input(mealUpdateSchema).mutation(async ({ ctx: { db, auth }, input }) => {
+        try {
+            await db.update(meal_log).set({
+                ...input,
+                mealDate: new Date(input.mealDate),
+            }).where(
+                and(
+                    eq(meal_log.id, input.id),
+                    eq(meal_log.userId, auth.user.id)
+                )
+            )
+            
+            return {
+                success: true,
+                message: "Meal log updated successfully"
             }
         } catch (error) {
             handleTRPCError(error)

@@ -8,6 +8,7 @@ import { ArrowUpDown, Loader2, MoreHorizontal } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { toast } from "sonner"
+import MealLogForm from "~/components/logs/forms/meal-upload"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "~/components/ui/alert-dialog"
 import { Button, buttonVariants } from "~/components/ui/button"
 import { Checkbox } from "~/components/ui/checkbox"
@@ -171,14 +172,16 @@ export const mealLogColumns: ColumnDef<GetMealLogsOutput[number]>[] = [
                         </DropdownMenu>
                         <DialogContent>
                             <DialogHeader>
-                                <DialogTitle>Update target</DialogTitle>
+                                <DialogTitle>Update Meal log</DialogTitle>
                             </DialogHeader>
-                            {/* <GlucoseTargetForm defaultValues={
+                            <MealLogForm defaultValues={
                                 {
                                     ...target,
-                                    units: target.units as 'mg/dL' | 'mmol/L'
+                                    mealType: target.mealType as 'breakfast' | 'lunch' | 'dinner' | 'snack',
+                                    notes: target.notes ?? '',
+                                    mealDate: target.mealDate.toISOString(),
                                 }
-                            } type="update" id={target.id} /> */}
+                            } type="update" id={target.id} />
                         </DialogContent>
                     </Dialog>
                 </div>

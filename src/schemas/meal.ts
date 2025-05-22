@@ -7,3 +7,7 @@ export const mealUploadSchema = z.object({
     mealDate: z.string(),
     notes: z.string(),
 })
+
+export const mealUpdateSchema = mealUploadSchema.extend({
+    id: z.number(),
+})

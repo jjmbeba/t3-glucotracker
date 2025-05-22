@@ -1,28 +1,41 @@
 'use client'
 
 import { useForm } from '@tanstack/react-form'
+import { useQueryClient } from '@tanstack/react-query'
+import { getQueryKey } from '@trpc/react-query'
 import dayjs from 'dayjs'
-import { Calendar } from '~/components/ui/calendar'
 import { CalendarIcon, Loader2 } from 'lucide-react'
-import React from 'react'
+import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
+import type { z } from 'zod'
 import { Button } from '~/components/ui/button'
+import { Calendar } from '~/components/ui/calendar'
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import { Popover, PopoverContent, PopoverTrigger } from '~/components/ui/popover'
-import { Select, SelectItem, SelectContent, SelectValue, SelectTrigger } from '~/components/ui/select'
-import { cn } from '~/lib/utils'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~/components/ui/select'
 import { Textarea } from '~/components/ui/textarea'
-import { mealUploadSchema } from '~/schemas/meal'
 import { TimePicker } from '~/components/ui/time-picker'
 import { toISOStringWithTimezone } from '~/lib/time-picker-utils'
+import { cn } from '~/lib/utils'
+import { mealUploadSchema } from '~/schemas/meal'
 import { api } from '~/trpc/react'
-import { toast } from 'sonner'
-import { useQueryClient } from '@tanstack/react-query'
-import { getQueryKey } from '@trpc/react-query'
+
+type CreateProps = {
+    type: 'create',
+}
+
+type UpdateProps = {
+    type: 'update',
+    id: number,
+    defaultValues: z.infer<typeof mealUploadSchema>
+}
+
+type Props = CreateProps | UpdateProps
 
 type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack'
-
-const MealUpload = () => {
+const MealLogForm = ({ type, ...props }: Props) => {
+    const router = useRouter()
     const queryClient = useQueryClient()
     const queryKey = getQueryKey(api.meal.getLogs, undefined, 'query')
 
@@ -30,6 +43,23 @@ const MealUpload = () => {
         onSuccess: () => {
             toast.success("Meal uploaded successfully")
             form.reset()
+            router.refresh()
+        },
+        onError: (error) => {
+            toast.error(error.message)
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({
+                queryKey
+            })
+        }
+    })
+
+    const { mutate: updateMeal, isPending: isUpdatePending } = api.meal.updateLog.useMutation({
+        onSuccess: () => {
+            toast.success("Meal updated successfully")
+            form.reset()
+            router.refresh()
         },
         onError: (error) => {
             toast.error(error.message)
@@ -42,7 +72,7 @@ const MealUpload = () => {
     })
 
     const form = useForm({
-        defaultValues: {
+        defaultValues: type === 'update' && 'defaultValues' in props ? mealUploadSchema.parse(props.defaultValues) : {
             mealDescription: '',
             estimatedCarbs: 0,
             mealType: 'breakfast' as MealType,
@@ -53,7 +83,14 @@ const MealUpload = () => {
             onChange: mealUploadSchema
         },
         onSubmit: ({ value }) => {
-            uploadMeal(value)
+            if (type === 'create') {
+                uploadMeal(value)
+            } else {
+                updateMeal({
+                    ...value,
+                    id: 'id' in props ? props.id : 0
+                })
+            }
         }
     })
 
@@ -86,28 +123,6 @@ const MealUpload = () => {
                                             <SelectItem value="snack">Snack</SelectItem>
                                         </SelectContent>
                                     </Select>
-                                    {field.state.meta.errors.map((error, i) => (
-                                        <div key={`${field.name}-error-${i}`} className="text-red-500 text-sm">
-                                            {error?.message}
-                                        </div>
-                                    ))}
-                                </>
-                            )}
-                        />
-                    </div>
-                    <div className="grid gap-2">
-                        <Label htmlFor="mealDescription">Meal Description</Label>
-                        <form.Field
-                            name="mealDescription"
-                            children={(field) => (
-                                <>
-                                    <Textarea
-                                        id="mealDescription"
-                                        placeholder="Meal Description"
-                                        value={field.state.value}
-                                        onBlur={field.handleBlur}
-                                        onChange={(e) => field.handleChange(e.target.value)}
-                                    />
                                     {field.state.meta.errors.map((error, i) => (
                                         <div key={`${field.name}-error-${i}`} className="text-red-500 text-sm">
                                             {error?.message}
@@ -195,6 +210,28 @@ const MealUpload = () => {
                         />
                     </div>
                     <div className="grid gap-2">
+                        <Label htmlFor="mealDescription">Meal Description</Label>
+                        <form.Field
+                            name="mealDescription"
+                            children={(field) => (
+                                <>
+                                    <Textarea
+                                        id="mealDescription"
+                                        placeholder="Meal Description"
+                                        value={field.state.value}
+                                        onBlur={field.handleBlur}
+                                        onChange={(e) => field.handleChange(e.target.value)}
+                                    />
+                                    {field.state.meta.errors.map((error, i) => (
+                                        <div key={`${field.name}-error-${i}`} className="text-red-500 text-sm">
+                                            {error?.message}
+                                        </div>
+                                    ))}
+                                </>
+                            )}
+                        />
+                    </div>
+                    <div className="grid gap-2">
                         <div className='flex items-center justify-between'>
                             <Label htmlFor="notes">Notes</Label>
                             <span className='text-xs text-muted-foreground'>Optional</span>
@@ -223,8 +260,8 @@ const MealUpload = () => {
                 <form.Subscribe
                     selector={(state) => [state.canSubmit, state.isSubmitting]}
                     children={([canSubmit, isSubmitting]) => (
-                        <Button type='submit' disabled={!canSubmit || isSubmitting || isPending}>
-                            {isSubmitting || isPending ? <Loader2 className='w-4 h-4 animate-spin' /> : 'Submit'}
+                        <Button className='mt-4' type='submit' disabled={!canSubmit || isSubmitting || isPending || isUpdatePending}>
+                            {isSubmitting || isPending || isUpdatePending ? <Loader2 className='w-4 h-4 animate-spin' /> : 'Submit'}
                         </Button>
                     )}
                 />
@@ -233,4 +270,4 @@ const MealUpload = () => {
     )
 }
 
-export default MealUpload
+export default MealLogForm
