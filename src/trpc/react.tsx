@@ -39,6 +39,7 @@ export type RouterInputs = inferRouterInputs<AppRouter>;
 export type RouterOutputs = inferRouterOutputs<AppRouter>;
 export type GetGlucoseLogsOutput = RouterOutputs['glucose']['getLogs']
 export type GetGlucoseTargetsOutput = RouterOutputs['glucose']['getTargets']
+export type GetMealLogsOutput = RouterOutputs['meal']['getLogs']
 
 export function TRPCReactProvider(props: { children: React.ReactNode }) {
 	const queryClient = getQueryClient();

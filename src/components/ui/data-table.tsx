@@ -26,12 +26,16 @@ import { Input } from "./input"
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[]
-    data: TData[]
+    data: TData[],
+    searchedColumn?: string
+    searchedColumnLabel?: string
 }
 
 export function DataTable<TData, TValue>({
     columns,
     data,
+    searchedColumn,
+    searchedColumnLabel
 }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = useState<SortingState>([])
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>(
@@ -56,18 +60,20 @@ export function DataTable<TData, TValue>({
         }
     })
 
+    console.log("searchedColumn", searchedColumn)
+
     return (
         <div>
-            <div className="flex items-center py-4">
+            {searchedColumn && <div className="flex items-center py-4">
                 <Input
-                    placeholder="Filter target names..."
-                    value={(table.getColumn("targetName")?.getFilterValue() as string) ?? ""}
+                    placeholder={`Filter ${searchedColumnLabel}...`}
+                    value={(table.getColumn(searchedColumn)?.getFilterValue() as string) ?? ""}
                     onChange={(event) =>
-                        table.getColumn("targetName")?.setFilterValue(event.target.value)
+                        table.getColumn(searchedColumn)?.setFilterValue(event.target.value)
                     }
                     className="max-w-sm"
                 />
-            </div>
+            </div>}
             <div className="rounded-md border">
                 <Table>
                     <TableHeader>
