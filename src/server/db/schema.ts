@@ -114,11 +114,11 @@ export const medication_log = createTable("medication_log", (d) => ({
 	dosageAmountTaken: d.integer('dosage_amount_taken').notNull(),
 	dosageUnitTaken: d.text('dosage_unit_taken').notNull(),
 	notes: d.text('notes'),
-createdAt: d
- 		.timestamp({ withTimezone: true })
+	createdAt: d
+		.timestamp({ withTimezone: true })
 		.default(sql`CURRENT_TIMESTAMP`)
 		.notNull(),
- 	updatedAt: d.timestamp({ withTimezone: true }).$onUpdate(() => new Date()),
+	updatedAt: d.timestamp({ withTimezone: true }).$onUpdate(() => new Date()),
 }))
 
 export const glucose_target = createTable("glucose_target", (d) => ({
@@ -134,3 +134,20 @@ export const glucose_target = createTable("glucose_target", (d) => ({
 		.notNull(),
 	updatedAt: d.timestamp({ withTimezone: true }).$onUpdate(() => new Date()),
 }))
+
+export const meal_log = createTable("meal_log", (d) => ({
+	id: d.integer('id').primaryKey().generatedByDefaultAsIdentity(),
+	userId: d.text('user_id').notNull().references(() => user.id, { onDelete: 'cascade' }),
+	mealDescription: d.text('meal_description').notNull(),
+	mealType: d.text('meal_type').notNull(),
+	mealDate: d.timestamp('meal_date').notNull(),
+	estimatedCarbs: d.integer('estimated_carbs').notNull(),
+	notes: d.text('notes'),
+	createdAt: d
+		.timestamp({ withTimezone: true })
+		.default(sql`CURRENT_TIMESTAMP`)
+		.notNull(),
+	updatedAt: d.timestamp({ withTimezone: true }).$onUpdate(() => new Date()),
+}))
+
+

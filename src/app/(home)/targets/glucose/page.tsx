@@ -19,7 +19,7 @@ const GlucoseTargetsPage = async () => {
                 <h1 className="page-title">Glucose Targets</h1>
                 <GlucoseTargetForm type="create" />
                 <div className="mt-10">
-                    <DataTable columns={glucoseTargetsColumns} data={targets} />
+                    <DataTable columns={glucoseTargetsColumns} data={targets} searchedColumn="targetName" searchedColumnLabel="Target Name" />
                 </div>
             </div>
         </HydrateClient>
