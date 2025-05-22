@@ -1,3 +1,4 @@
+import { eq } from "drizzle-orm";
 import { handleTRPCError } from "~/lib/errors";
 import { mealUploadSchema } from "~/schemas/meal";
 import { meal_log } from "~/server/db/schema";
@@ -17,6 +18,13 @@ export const mealRouter = createTRPCRouter({
                 message: "Meal uploaded successfully"
             }
 
+        } catch (error) {
+            handleTRPCError(error)
+        }
+    }),
+    getLogs: protectedProcedure.query(async ({ ctx: { db, auth } }) => {
+        try {
+            return await db.select().from(meal_log).where(eq(meal_log.userId, auth.user.id))
         } catch (error) {
             handleTRPCError(error)
         }

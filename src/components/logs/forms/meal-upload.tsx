@@ -15,10 +15,32 @@ import { Textarea } from '~/components/ui/textarea'
 import { mealUploadSchema } from '~/schemas/meal'
 import { TimePicker } from '~/components/ui/time-picker'
 import { toISOStringWithTimezone } from '~/lib/time-picker-utils'
+import { api } from '~/trpc/react'
+import { toast } from 'sonner'
+import { useQueryClient } from '@tanstack/react-query'
+import { getQueryKey } from '@trpc/react-query'
 
 type MealType = 'breakfast' | 'lunch' | 'dinner' | 'snack'
 
 const MealUpload = () => {
+    const queryClient = useQueryClient()
+    const queryKey = getQueryKey(api.meal.getLogs, undefined, 'query')
+
+    const { mutate: uploadMeal, isPending } = api.meal.upload.useMutation({
+        onSuccess: () => {
+            toast.success("Meal uploaded successfully")
+            form.reset()
+        },
+        onError: (error) => {
+            toast.error(error.message)
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({
+                queryKey
+            })
+        }
+    })
+
     const form = useForm({
         defaultValues: {
             mealDescription: '',
@@ -31,7 +53,7 @@ const MealUpload = () => {
             onChange: mealUploadSchema
         },
         onSubmit: ({ value }) => {
-            console.log(value)
+            uploadMeal(value)
         }
     })
 
@@ -201,8 +223,8 @@ const MealUpload = () => {
                 <form.Subscribe
                     selector={(state) => [state.canSubmit, state.isSubmitting]}
                     children={([canSubmit, isSubmitting]) => (
-                        <Button type='submit' disabled={!canSubmit || isSubmitting}>
-                            {isSubmitting ? <Loader2 className='w-4 h-4 animate-spin' /> : 'Submit'}
+                        <Button type='submit' disabled={!canSubmit || isSubmitting || isPending}>
+                            {isSubmitting || isPending ? <Loader2 className='w-4 h-4 animate-spin' /> : 'Submit'}
                         </Button>
                     )}
                 />
