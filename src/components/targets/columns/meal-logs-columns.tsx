@@ -4,10 +4,12 @@ import { useQueryClient } from "@tanstack/react-query"
 import { type ColumnDef } from "@tanstack/react-table"
 import { getQueryKey } from "@trpc/react-query"
 import dayjs from "dayjs"
-import { ArrowUpDown, MoreHorizontal } from "lucide-react"
+import { ArrowUpDown, Loader2, MoreHorizontal } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
-import { Button } from "~/components/ui/button"
+import { toast } from "sonner"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "~/components/ui/alert-dialog"
+import { Button, buttonVariants } from "~/components/ui/button"
 import { Checkbox } from "~/components/ui/checkbox"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog"
 import {
@@ -18,7 +20,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu"
-import { capitalize } from "~/lib/utils"
+import { capitalize, cn } from "~/lib/utils"
 import { api, type GetMealLogsOutput } from "~/trpc/react"
 
 
@@ -105,24 +107,24 @@ export const mealLogColumns: ColumnDef<GetMealLogsOutput[number]>[] = [
             const target = row.original
 
             const queryClient = useQueryClient()
-            const targetsKey = getQueryKey(api.glucose.getTargets, undefined, 'query')
+            const targetsKey = getQueryKey(api.meal.getLogs, undefined, 'query')
             const router = useRouter()
             const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
 
 
-            // const { mutate: deleteTarget, isPending } = api.glucose.deleteTarget.useMutation({
-            //     onSuccess: () => {
-            //         toast.success("Target deleted successfully")
-            //     },
-            //     onError: (error) => {
-            //         toast.error(error.message)
-            //         console.error(error)
-            //     },
-            //     onSettled: () => {
-            //         queryClient.invalidateQueries({ queryKey: targetsKey })
-            //         router.refresh()
-            //     }
-            // })
+            const { mutate: deleteMealLog, isPending } = api.meal.deleteLog.useMutation({
+                onSuccess: () => {
+                    toast.success("Meal log deleted successfully")
+                },
+                onError: (error) => {
+                    toast.error(error.message)
+                    console.error(error)
+                },
+                onSettled: () => {
+                    queryClient.invalidateQueries({ queryKey: targetsKey })
+                    router.refresh()
+                }
+            })
 
             return (
                 <div>
@@ -138,33 +140,33 @@ export const mealLogColumns: ColumnDef<GetMealLogsOutput[number]>[] = [
                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
                                 <DialogTrigger asChild>
-                                    <DropdownMenuItem>Update target</DropdownMenuItem>
+                                    <DropdownMenuItem>Update Meal Log</DropdownMenuItem>
                                 </DialogTrigger>
-                                {/* <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                                <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
                                     <AlertDialogTrigger asChild>
                                         <DropdownMenuItem onSelect={(e) => {
                                             e.preventDefault()
                                             setIsDeleteDialogOpen(true)
-                                        }} className="text-destructive">Delete target</DropdownMenuItem>
+                                        }} className="text-destructive">Delete Meal Log</DropdownMenuItem>
                                     </AlertDialogTrigger>
                                     <AlertDialogContent>
                                         <AlertDialogHeader>
                                             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                                             <AlertDialogDescription>
-                                                This action cannot be undone. This will permanently delete the glucose target.
+                                                This action cannot be undone. This will permanently delete the meal log.
                                             </AlertDialogDescription>
                                         </AlertDialogHeader>
                                         <AlertDialogFooter>
                                             <AlertDialogCancel type="button">Cancel</AlertDialogCancel>
                                             <AlertDialogAction className={cn(buttonVariants({ variant: "destructive" }))} disabled={isPending} onClick={() =>{
-                                                 deleteTarget(target.id)
+                                                 deleteMealLog({id: target.id})
                                                  setIsDeleteDialogOpen(false)
                                             }}>
                                                 {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "Delete"}
                                             </AlertDialogAction>
                                         </AlertDialogFooter>
                                     </AlertDialogContent>
-                                </AlertDialog> */}
+                                </AlertDialog>
                             </DropdownMenuContent>
                         </DropdownMenu>
                         <DialogContent>
