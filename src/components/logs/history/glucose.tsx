@@ -3,7 +3,7 @@
 import { api, type GetGlucoseLogsOutput, type GetGlucoseTargetsOutput } from '~/trpc/react'
 
 import dayjs from "dayjs"
-import { PlusIcon } from 'lucide-react'
+import { MessageSquareWarningIcon, PlusIcon } from 'lucide-react'
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { toast } from 'sonner'
@@ -57,9 +57,9 @@ const GlucoseHistorySkeleton = () => {
     )
 }
 
-const GlucoseHistory = ({ timePeriod, targetId }: { timePeriod: string, targetId: string }) => {
+const GlucoseHistory = ({ error, analysis, timePeriod, targetId }: { error: string, analysis: string, timePeriod: string, targetId: string }) => {
     const { data: glucoseTargets, isLoading: isGlucoseTargetsLoading, error: glucoseTargetsError } = api.glucose.getTargets.useQuery()
-    const { data, isLoading: isGlucoseLogsLoading, error } = api.glucose.getLogs.useQuery()
+    const { data, isLoading: isGlucoseLogsLoading, error: glucoseLogsError } = api.glucose.getLogs.useQuery()
 
     const [glucoseLogs, setGlucoseLogs] = useState<GetGlucoseLogsOutput>([])
     const [selectedTarget, setSelectedTarget] = useState<GetGlucoseTargetsOutput[number] | null>(null)
@@ -84,9 +84,9 @@ const GlucoseHistory = ({ timePeriod, targetId }: { timePeriod: string, targetId
         setSelectedTarget(glucoseTargets.find((target) => target.id.toString() === targetId) ?? null)
     }, [glucoseTargets, targetId])
 
-    if (error) {
+    if (glucoseLogsError) {
         toast.error("Error fetching glucose logs")
-        console.error(error)
+        console.error(glucoseLogsError)
     }
 
     if (glucoseTargetsError) {
@@ -116,6 +116,8 @@ const GlucoseHistory = ({ timePeriod, targetId }: { timePeriod: string, targetId
             </div>
         )
     }
+
+    console.log(error)
 
     return (
         <div className="flex flex-col">
@@ -148,6 +150,16 @@ const GlucoseHistory = ({ timePeriod, targetId }: { timePeriod: string, targetId
                         </SelectContent>
                     </Select>}
                 </div>
+            </div>
+            <div className="mt-4">
+                <p className="text-sm text-muted-foreground">
+                    {error ? (
+                        <span className="text-red-500 flex items-center gap-2">
+                            <MessageSquareWarningIcon className='size-4' />
+                            {error}
+                        </span>
+                    ) : analysis}
+                </p>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
                 <div className="lg:col-span-1">

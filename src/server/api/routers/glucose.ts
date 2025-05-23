@@ -1,10 +1,14 @@
 import { and, desc, eq } from "drizzle-orm";
+import { z } from "zod";
+import { ai } from "~/gemini";
 import { handleTRPCError } from "~/lib/errors";
 import { glucoseFormSchema } from "~/schemas/logs";
+import { glucoseTargetSchema, glucoseTargetUpdateSchema } from "~/schemas/targets";
 import { glucose_target, glucoseLog } from "~/server/db/schema";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { glucoseTargetSchema, glucoseTargetUpdateSchema } from "~/schemas/targets";
-import { z } from "zod";
+import { env } from "~/env";
+import ratelimit from "~/redis";
+import { TRPCError } from "@trpc/server";
 
 export const glucoseRouter = createTRPCRouter({
     create: protectedProcedure.input(glucoseFormSchema).mutation(async ({ ctx: { db, auth }, input }) => {
@@ -47,7 +51,7 @@ export const glucoseRouter = createTRPCRouter({
     }),
     getTargets: protectedProcedure.query(async ({ ctx: { db, auth } }) => {
         try {
-        return await db.select().from(glucose_target).where(eq(glucose_target.userId, auth.user.id))
+            return await db.select().from(glucose_target).where(eq(glucose_target.userId, auth.user.id))
         } catch (error) {
             handleTRPCError(error)
         }
@@ -99,6 +103,71 @@ export const glucoseRouter = createTRPCRouter({
                 success: true,
                 message: "Target updated successfully"
             }
+        } catch (error) {
+            handleTRPCError(error)
+        }
+    }),
+    getSummary: protectedProcedure.query(async ({ ctx: { db, auth } }) => {
+        try {
+            const { success } = await ratelimit.limit(auth.user.id)
+
+            if (!success) {
+                throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "Too many requests" })
+            }
+
+            const glucoseLogs = await db.select({
+                glucose: glucoseLog.glucose,
+                date: glucoseLog.date,
+            }).from(glucoseLog).where(eq(glucoseLog.userId, auth.user.id))
+            const glucoseTargets = await db.select({
+                highThreshold: glucose_target.highThreshold,
+                lowThreshold: glucose_target.lowThreshold,
+                units: glucose_target.units,
+            }).from(glucose_target).where(eq(glucose_target.userId, auth.user.id))
+
+            const response = await ai.models.generateContent({
+                model: env.GEMINI_MODEL,
+                contents: [
+                    {
+                        role: "user",
+                        parts: [{
+                            text: `As a diabetes educator, analyze these glucose readings and provide a concise summary with recommendations. Glucose logs: ${JSON.stringify(glucoseLogs)}. Targets: ${JSON.stringify(glucoseTargets)}. Provide a single sentence summary with recommendations. If there are no glucose logs, return "No glucose logs found".`
+                        }]
+
+                    }
+                ],
+            })
+
+            return response.text
+
+        } catch (error) {
+            handleTRPCError(error)
+        }
+    }),
+    getGlucoseAnalysis: protectedProcedure.query(async ({ ctx: { db, auth } }) => {
+        try {
+            const { success } = await ratelimit.limit(auth.user.id)
+
+            if (!success) {
+                throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "Too many requests" })
+            }
+
+            const glucoseLogs = await db.select({
+                glucose: glucoseLog.glucose,
+                date: glucoseLog.date,
+            }).from(glucoseLog).where(eq(glucoseLog.userId, auth.user.id))
+
+            const response = await ai.models.generateContent({
+                model: env.GEMINI_MODEL,
+                contents: [{
+                    role: "user",
+                    parts: [{
+                        text: `As a diabetes educator, analyze these glucose readings and provide a concise summary with recommendations. Glucose logs: ${JSON.stringify(glucoseLogs)}. Provide a maximum of 3 sentences summary with recommendations. If there are no glucose logs, return "No glucose logs found". Check if there are patterns for hyperglycemia or hypoglycemia based on meal time or time of day.`
+                    }]
+                }],
+            })
+
+            return response.text
         } catch (error) {
             handleTRPCError(error)
         }
