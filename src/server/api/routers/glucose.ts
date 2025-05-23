@@ -131,7 +131,7 @@ export const glucoseRouter = createTRPCRouter({
                     {
                         role: "user",
                         parts: [{
-                            text: `As a diabetes educator, analyze these glucose readings and provide a concise summary with recommendations. Glucose logs: ${JSON.stringify(glucoseLogs)}. Targets: ${JSON.stringify(glucoseTargets)}. Provide a single sentence summary with recommendations.`
+                            text: `As a diabetes educator, analyze these glucose readings and provide a concise summary with recommendations. Glucose logs: ${JSON.stringify(glucoseLogs)}. Targets: ${JSON.stringify(glucoseTargets)}. Provide a single sentence summary with recommendations. If there are no glucose logs, return "No glucose logs found".`
                         }]
 
                     }
@@ -162,7 +162,7 @@ export const glucoseRouter = createTRPCRouter({
                 contents: [{
                     role: "user",
                     parts: [{
-                        text: `As a diabetes educator, analyze these glucose readings and provide a concise summary with recommendations. Glucose logs: ${JSON.stringify(glucoseLogs)}. Provide a single sentence summary with recommendations.`
+                        text: `As a diabetes educator, analyze these glucose readings and provide a concise summary with recommendations. Glucose logs: ${JSON.stringify(glucoseLogs)}. Provide a maximum of 3 sentences summary with recommendations. If there are no glucose logs, return "No glucose logs found". Check if there are patterns for hyperglycemia or hypoglycemia based on meal time or time of day.`
                     }]
                 }],
             })
