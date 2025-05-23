@@ -18,6 +18,7 @@ export const env = createEnv({
 		GITHUB_CLIENT_SECRET: z.string(),
 		UPLOADTHING_TOKEN: z.string(),
 		GEMINI_API_KEY: z.string(),
+		GEMINI_MODEL: z.string(),
 	},
 
 	/**
@@ -47,6 +48,7 @@ export const env = createEnv({
 		GITHUB_CLIENT_SECRET: process.env.GITHUB_CLIENT_SECRET,
 		UPLOADTHING_TOKEN: process.env.UPLOADTHING_TOKEN,
 		GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+		GEMINI_MODEL: process.env.GEMINI_MODEL,
 		// NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
 	},
 	/**

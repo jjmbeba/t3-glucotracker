@@ -24,7 +24,13 @@ const DashboardPage = async () => {
     console.error(error)
   }
 
-  const summary = await api.glucose.getSummary()
+  let summary = ""
+
+  try {
+    summary = await api.glucose.getSummary() ?? ''
+  } catch (error) {
+    console.error(error)
+  }
 
   return (
     <div className="px-4 sm:px-6 lg:px-8">

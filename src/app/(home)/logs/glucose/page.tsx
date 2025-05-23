@@ -1,3 +1,4 @@
+import { toast } from 'sonner'
 import GlucoseForm from '~/components/logs/forms/glucose'
 import GlucoseHistory from '~/components/logs/history/glucose'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
@@ -15,7 +16,14 @@ const GlucoseLogsPage = async (props : {
     const tab = searchParams.tab
     const targetId = searchParams.targetId
 
-    const analysis = await api.glucose.getGlucoseAnalysis()
+    let analysis = ""
+
+    try {
+        analysis = await api.glucose.getGlucoseAnalysis() ?? ''
+    } catch (error) {
+        console.error(error)
+        toast.error("Error fetching glucose analysis")
+    }
 
     return (
         <HydrateClient>

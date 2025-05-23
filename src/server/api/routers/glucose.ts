@@ -6,6 +6,7 @@ import { glucoseFormSchema } from "~/schemas/logs";
 import { glucoseTargetSchema, glucoseTargetUpdateSchema } from "~/schemas/targets";
 import { glucose_target, glucoseLog } from "~/server/db/schema";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
+import { env } from "~/env";
 
 export const glucoseRouter = createTRPCRouter({
     create: protectedProcedure.input(glucoseFormSchema).mutation(async ({ ctx: { db, auth }, input }) => {
@@ -106,20 +107,27 @@ export const glucoseRouter = createTRPCRouter({
     }),
     getSummary: protectedProcedure.query(async ({ ctx: { db, auth } }) => {
         try {
-            const glucoseLogs = await db.select().from(glucoseLog).where(eq(glucoseLog.userId, auth.user.id))
-            const glucoseTargets = await db.select().from(glucose_target).where(eq(glucose_target.userId, auth.user.id))
+            const glucoseLogs = await db.select({
+                glucose: glucoseLog.glucose,
+                date: glucoseLog.date,
+            }).from(glucoseLog).where(eq(glucoseLog.userId, auth.user.id))
+            const glucoseTargets = await db.select({
+                highThreshold: glucose_target.highThreshold,
+                lowThreshold: glucose_target.lowThreshold,
+                units: glucose_target.units,
+            }).from(glucose_target).where(eq(glucose_target.userId, auth.user.id))
 
             const response = await ai.models.generateContent({
-                model: "gemini-2.0-flash",
-                contents: `
-                You are a diabetes educator.
-                You are given a list of glucose logs.
-                You are to provide a summary according to the glucose logs and the target (if set).
-                The logs and target are as follows:
-                ${JSON.stringify(glucoseLogs)} 
-                ${JSON.stringify(glucoseTargets)}
-                Make it short and concise. It should be a single sentence. Make recommendations for the user based on the input.
-                `,
+                model: env.GEMINI_MODEL,
+                contents: [
+                    {
+                        role: "user",
+                        parts: [{
+                            text: `As a diabetes educator, analyze these glucose readings and provide a concise summary with recommendations. Glucose logs: ${JSON.stringify(glucoseLogs)}. Targets: ${JSON.stringify(glucoseTargets)}. Provide a single sentence summary with recommendations.`
+                        }]
+
+                    }
+                ],
             })
 
             return response.text
@@ -130,18 +138,19 @@ export const glucoseRouter = createTRPCRouter({
     }),
     getGlucoseAnalysis: protectedProcedure.query(async ({ ctx: { db, auth } }) => {
         try {
-            const glucoseLogs = await db.select().from(glucoseLog).where(eq(glucoseLog.userId, auth.user.id))
+            const glucoseLogs = await db.select({
+                glucose: glucoseLog.glucose,
+                date: glucoseLog.date,
+            }).from(glucoseLog).where(eq(glucoseLog.userId, auth.user.id))
 
             const response = await ai.models.generateContent({
-                model: "gemini-1.5-flash",
-                contents: `
-                You are a diabetes educator.
-                You are given a list of glucose logs.
-                You are to provide a detailed analysis of the glucose logs.
-                The logs are as follows:
-                ${JSON.stringify(glucoseLogs)}
-                Make it short and concise. It should be a single sentence. Highlight the number of highs (above 140mg/dL) and lows (below 80mg/dL) over a certain time period.
-                `,
+                model: env.GEMINI_MODEL,
+                contents: [{
+                    role: "user",
+                    parts: [{
+                        text: `As a diabetes educator, analyze these glucose readings and provide a concise summary with recommendations. Glucose logs: ${JSON.stringify(glucoseLogs)}. Provide a single sentence summary with recommendations.`
+                    }]
+                }],
             })
 
             return response.text
