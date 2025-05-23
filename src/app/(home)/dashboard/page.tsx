@@ -24,6 +24,8 @@ const DashboardPage = async () => {
     console.error(error)
   }
 
+  const summary = await api.glucose.getSummary()
+
   return (
     <div className="px-4 sm:px-6 lg:px-8">
       <div className='flex sm:flex-row sm:items-center justify-between gap-4'>
@@ -31,6 +33,9 @@ const DashboardPage = async () => {
         <div>
           <QuickAddButton />
         </div>
+      </div>
+      <div className='my-4 text-sm text-muted-foreground'>
+        Summary: {summary}
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
         <div className="grid grid-rows-2 gap-4 h-full">

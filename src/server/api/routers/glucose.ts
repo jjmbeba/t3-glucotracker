@@ -1,10 +1,11 @@
 import { and, desc, eq } from "drizzle-orm";
+import { z } from "zod";
+import { ai } from "~/gemini";
 import { handleTRPCError } from "~/lib/errors";
 import { glucoseFormSchema } from "~/schemas/logs";
+import { glucoseTargetSchema, glucoseTargetUpdateSchema } from "~/schemas/targets";
 import { glucose_target, glucoseLog } from "~/server/db/schema";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { glucoseTargetSchema, glucoseTargetUpdateSchema } from "~/schemas/targets";
-import { z } from "zod";
 
 export const glucoseRouter = createTRPCRouter({
     create: protectedProcedure.input(glucoseFormSchema).mutation(async ({ ctx: { db, auth }, input }) => {
@@ -47,7 +48,7 @@ export const glucoseRouter = createTRPCRouter({
     }),
     getTargets: protectedProcedure.query(async ({ ctx: { db, auth } }) => {
         try {
-        return await db.select().from(glucose_target).where(eq(glucose_target.userId, auth.user.id))
+            return await db.select().from(glucose_target).where(eq(glucose_target.userId, auth.user.id))
         } catch (error) {
             handleTRPCError(error)
         }
@@ -99,6 +100,30 @@ export const glucoseRouter = createTRPCRouter({
                 success: true,
                 message: "Target updated successfully"
             }
+        } catch (error) {
+            handleTRPCError(error)
+        }
+    }),
+    getSummary: protectedProcedure.query(async ({ ctx: { db, auth } }) => {
+        try {
+            const glucoseLogs = await db.select().from(glucoseLog).where(eq(glucoseLog.userId, auth.user.id))
+            const glucoseTargets = await db.select().from(glucose_target).where(eq(glucose_target.userId, auth.user.id))
+
+            const response = await ai.models.generateContent({
+                model: "gemini-2.0-flash",
+                contents: `
+                You are a diabetes educator.
+                You are given a list of glucose logs.
+                You are to provide a summary according to the glucose logs and the target (if set).
+                The logs and target are as follows:
+                ${JSON.stringify(glucoseLogs)} 
+                ${JSON.stringify(glucoseTargets)}
+                Make it short and concise. It should be a single sentence. Make recommendations for the user based on the input.
+                `,
+            })
+
+            return response.text
+
         } catch (error) {
             handleTRPCError(error)
         }
