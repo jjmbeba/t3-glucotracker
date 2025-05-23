@@ -15,6 +15,8 @@ const GlucoseLogsPage = async (props : {
     const tab = searchParams.tab
     const targetId = searchParams.targetId
 
+    const analysis = await api.glucose.getGlucoseAnalysis()
+
     return (
         <HydrateClient>
             <div>
@@ -27,7 +29,7 @@ const GlucoseLogsPage = async (props : {
                         <TabsTrigger value='upload'>Upload</TabsTrigger>
                     </TabsList>
                     <TabsContent value='history'>
-                        <GlucoseHistory timePeriod={timePeriod as string ?? ''} targetId={targetId as string ?? ''} />
+                        <GlucoseHistory analysis={analysis ?? ''} timePeriod={timePeriod as string ?? ''} targetId={targetId as string ?? ''} />
                     </TabsContent>
                     <TabsContent value='upload'>
                         <GlucoseForm />

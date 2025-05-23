@@ -57,7 +57,7 @@ const GlucoseHistorySkeleton = () => {
     )
 }
 
-const GlucoseHistory = ({ timePeriod, targetId }: { timePeriod: string, targetId: string }) => {
+const GlucoseHistory = ({ analysis, timePeriod, targetId }: { analysis: string, timePeriod: string, targetId: string }) => {
     const { data: glucoseTargets, isLoading: isGlucoseTargetsLoading, error: glucoseTargetsError } = api.glucose.getTargets.useQuery()
     const { data, isLoading: isGlucoseLogsLoading, error } = api.glucose.getLogs.useQuery()
 
@@ -148,6 +148,11 @@ const GlucoseHistory = ({ timePeriod, targetId }: { timePeriod: string, targetId
                         </SelectContent>
                     </Select>}
                 </div>
+            </div>
+            <div className="mt-4">
+                <p className="text-sm text-muted-foreground">
+                    {analysis}
+                </p>
             </div>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
                 <div className="lg:col-span-1">

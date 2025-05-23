@@ -127,5 +127,26 @@ export const glucoseRouter = createTRPCRouter({
         } catch (error) {
             handleTRPCError(error)
         }
+    }),
+    getGlucoseAnalysis: protectedProcedure.query(async ({ ctx: { db, auth } }) => {
+        try {
+            const glucoseLogs = await db.select().from(glucoseLog).where(eq(glucoseLog.userId, auth.user.id))
+
+            const response = await ai.models.generateContent({
+                model: "gemini-1.5-flash",
+                contents: `
+                You are a diabetes educator.
+                You are given a list of glucose logs.
+                You are to provide a detailed analysis of the glucose logs.
+                The logs are as follows:
+                ${JSON.stringify(glucoseLogs)}
+                Make it short and concise. It should be a single sentence. Highlight the number of highs (above 140mg/dL) and lows (below 80mg/dL) over a certain time period.
+                `,
+            })
+
+            return response.text
+        } catch (error) {
+            handleTRPCError(error)
+        }
     })
 });
