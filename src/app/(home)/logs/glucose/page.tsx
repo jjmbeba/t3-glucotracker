@@ -1,4 +1,4 @@
-import { toast } from 'sonner'
+import { TRPCError } from '@trpc/server'
 import GlucoseForm from '~/components/logs/forms/glucose'
 import GlucoseHistory from '~/components/logs/history/glucose'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
@@ -17,12 +17,16 @@ const GlucoseLogsPage = async (props : {
     const targetId = searchParams.targetId
 
     let analysis = ""
+    let error = ''
 
     try {
         analysis = await api.glucose.getGlucoseAnalysis() ?? ''
-    } catch (error) {
-        console.error(error)
-        toast.error("Error fetching glucose analysis")
+    } catch (e) {
+        if(e instanceof TRPCError && e.code === 'TOO_MANY_REQUESTS') {
+            error = 'Too many requests. Please try again later for the glucose summary.'
+        } else {
+            error = 'An unknown error occurred'
+        }
     }
 
     return (
@@ -37,7 +41,7 @@ const GlucoseLogsPage = async (props : {
                         <TabsTrigger value='upload'>Upload</TabsTrigger>
                     </TabsList>
                     <TabsContent value='history'>
-                        <GlucoseHistory analysis={analysis ?? ''} timePeriod={timePeriod as string ?? ''} targetId={targetId as string ?? ''} />
+                        <GlucoseHistory error={error} analysis={analysis ?? ''} timePeriod={timePeriod as string ?? ''} targetId={targetId as string ?? ''} />
                     </TabsContent>
                     <TabsContent value='upload'>
                         <GlucoseForm />

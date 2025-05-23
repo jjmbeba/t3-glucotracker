@@ -1,4 +1,6 @@
+import { TRPCError } from '@trpc/server'
 import dayjs from 'dayjs'
+import { MessageSquareWarningIcon } from 'lucide-react'
 import { GlucoseHistoryChart } from '~/components/charts/glucose/glucose-history'
 import QuickAddButton from '~/components/common/quick-add-button'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
@@ -25,11 +27,16 @@ const DashboardPage = async () => {
   }
 
   let summary = ""
+  let error = ""
 
   try {
     summary = await api.glucose.getSummary() ?? ''
-  } catch (error) {
-    console.error(error)
+  } catch (e) {
+    if(e instanceof TRPCError && e.code === 'TOO_MANY_REQUESTS') {
+      error = 'Too many requests. Please try again later for the glucose summary.'
+    } else {
+      error = 'An unknown error occurred'
+    }
   }
 
   return (
@@ -41,7 +48,12 @@ const DashboardPage = async () => {
         </div>
       </div>
       <div className='my-4 text-sm text-muted-foreground'>
-        Summary: {summary}
+        {error ? (
+          <span className="text-red-500 flex items-center gap-2">
+            <MessageSquareWarningIcon className='size-4' />
+            {error}
+          </span>
+        ) : `Summary: ${summary}`}
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
         <div className="grid grid-rows-2 gap-4 h-full">

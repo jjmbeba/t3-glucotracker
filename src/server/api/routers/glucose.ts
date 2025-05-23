@@ -7,6 +7,8 @@ import { glucoseTargetSchema, glucoseTargetUpdateSchema } from "~/schemas/target
 import { glucose_target, glucoseLog } from "~/server/db/schema";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
 import { env } from "~/env";
+import ratelimit from "~/redis";
+import { TRPCError } from "@trpc/server";
 
 export const glucoseRouter = createTRPCRouter({
     create: protectedProcedure.input(glucoseFormSchema).mutation(async ({ ctx: { db, auth }, input }) => {
@@ -107,6 +109,12 @@ export const glucoseRouter = createTRPCRouter({
     }),
     getSummary: protectedProcedure.query(async ({ ctx: { db, auth } }) => {
         try {
+            const { success } = await ratelimit.limit(auth.user.id)
+
+            if (!success) {
+                throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "Too many requests" })
+            }
+
             const glucoseLogs = await db.select({
                 glucose: glucoseLog.glucose,
                 date: glucoseLog.date,
@@ -138,6 +146,12 @@ export const glucoseRouter = createTRPCRouter({
     }),
     getGlucoseAnalysis: protectedProcedure.query(async ({ ctx: { db, auth } }) => {
         try {
+            const { success } = await ratelimit.limit(auth.user.id)
+
+            if (!success) {
+                throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "Too many requests" })
+            }
+
             const glucoseLogs = await db.select({
                 glucose: glucoseLog.glucose,
                 date: glucoseLog.date,
