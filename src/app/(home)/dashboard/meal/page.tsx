@@ -17,7 +17,7 @@ const Page = async () => {
     return (
         <HydrateClient>
             <div>
-                <h1 className='page-title'>Meal</h1>
+                <h1 className='page-title'>Meal Logs</h1>
                 <Tabs defaultValue="history">
                     <TabsList>
                         <TabsTrigger value="history">History</TabsTrigger>

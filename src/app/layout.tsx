@@ -9,6 +9,7 @@ import { TRPCReactProvider } from "~/trpc/react";
 import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { extractRouterConfig } from "uploadthing/server";
 import { ourFileRouter } from "./api/uploadthing/core";
+import { ThemeProvider } from "~/components/providers/theme-provider";
 
 export const metadata: Metadata = {
 	title: "GlucoTrack",
@@ -30,7 +31,16 @@ export default function RootLayout({
 				<NextSSRPlugin
 					routerConfig={extractRouterConfig(ourFileRouter)}
 				/>
-				<TRPCReactProvider>{children}</TRPCReactProvider>
+				<TRPCReactProvider>
+					<ThemeProvider
+						attribute="class"
+						defaultTheme="system"
+						enableSystem
+						disableTransitionOnChange
+					>
+						{children}
+					</ThemeProvider>
+				</TRPCReactProvider>
 				<Toaster richColors />
 			</body>
 		</html>
