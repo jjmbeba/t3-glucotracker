@@ -1,6 +1,7 @@
 import React from 'react'
 import { AppSidebar } from "~/components/app-sidebar"
 import RouteBreadcrumbs from '~/components/common/route-breadcrumbs'
+import ThemeToggle from '~/components/common/theme-toggle'
 import UserButton from '~/components/common/user-button'
 import { Separator } from "~/components/ui/separator"
 import {
@@ -20,7 +21,8 @@ const Layout = ({ children }: { children: React.ReactNode }) => {
               <SidebarTrigger />
               <Separator orientation="vertical" className="mr-2 h-4" />
               <RouteBreadcrumbs />
-              <div className='flex-1 flex items-center justify-end'>
+              <div className='flex-1 flex items-center justify-end gap-4'>
+                <ThemeToggle />
                 <UserButton />
               </div>
             </div>

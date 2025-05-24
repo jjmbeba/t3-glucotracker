@@ -13,7 +13,7 @@ const MedicationPage = async (props: {
     return (
         <HydrateClient>
             <main>
-                <h1 className='page-title'>Medication</h1>
+                <h1 className='page-title'>Medication Logs</h1>
                 <Tabs defaultValue={tab as string ?? 'history'}>
                     <TabsList>
                     <TabsTrigger value="history">
