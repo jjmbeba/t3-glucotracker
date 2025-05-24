@@ -5,6 +5,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { getQueryKey } from '@trpc/react-query'
 import dayjs from 'dayjs'
 import { CalendarIcon, Loader2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Button } from '~/components/ui/button'
 import { Calendar } from '~/components/ui/calendar'
@@ -26,6 +27,7 @@ import { glucoseFormSchema } from '~/schemas/logs'
 import { api } from '~/trpc/react'
 
 const GlucoseForm = () => {
+    const router = useRouter()
     const queryKey = getQueryKey(api.glucose.getLogs, undefined, 'query')
     const queryClient = useQueryClient()
 
@@ -34,13 +36,16 @@ const GlucoseForm = () => {
             form.reset()
 
             toast.success("Glucose log created successfully")
-            queryClient.invalidateQueries({
-                queryKey
-            })
+            router.refresh()
         },
         onError: (error) => {
             toast.error(error.message)
             console.error(error)
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({
+                queryKey
+            })
         }
     })
 

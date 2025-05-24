@@ -58,13 +58,14 @@ const GlucoseHistorySkeleton = () => {
 }
 
 const GlucoseHistory = ({ error, analysis, timePeriod, targetId }: { error: string, analysis: string, timePeriod: string, targetId: string }) => {
+    const pathname = usePathname()
+    const router = useRouter()
+    
     const { data: glucoseTargets, isLoading: isGlucoseTargetsLoading, error: glucoseTargetsError } = api.glucose.getTargets.useQuery()
     const { data, isLoading: isGlucoseLogsLoading, error: glucoseLogsError } = api.glucose.getLogs.useQuery()
 
     const [glucoseLogs, setGlucoseLogs] = useState<GetGlucoseLogsOutput>([])
     const [selectedTarget, setSelectedTarget] = useState<GetGlucoseTargetsOutput[number] | null>(null)
-    const pathname = usePathname()
-    const router = useRouter()
 
     useEffect(() => {
         if (!data) return

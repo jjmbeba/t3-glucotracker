@@ -1,14 +1,14 @@
+import { TRPCError } from "@trpc/server";
 import { and, desc, eq } from "drizzle-orm";
 import { z } from "zod";
+import { env } from "~/env";
 import { ai } from "~/gemini";
 import { handleTRPCError } from "~/lib/errors";
+import { ratelimit, redis } from "~/redis";
 import { glucoseFormSchema } from "~/schemas/logs";
 import { glucoseTargetSchema, glucoseTargetUpdateSchema } from "~/schemas/targets";
 import { glucose_target, glucoseLog } from "~/server/db/schema";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { env } from "~/env";
-import ratelimit from "~/redis";
-import { TRPCError } from "@trpc/server";
 
 export const glucoseRouter = createTRPCRouter({
     create: protectedProcedure.input(glucoseFormSchema).mutation(async ({ ctx: { db, auth }, input }) => {
@@ -18,6 +18,8 @@ export const glucoseRouter = createTRPCRouter({
                 date: new Date(input.date),
                 userId: auth.user.id,
             })
+
+            await redis.del(`summary:${auth.user.id}:${new Date().getDate()}`,`glucose_analysis:${auth.user.id}:${new Date().getDate()}`)
 
             return {
                 success: true,
@@ -63,6 +65,8 @@ export const glucoseRouter = createTRPCRouter({
                 userId: auth.user.id,
             })
 
+            await redis.del(`summary:${auth.user.id}:${new Date().getDate()}`)
+
             return {
                 success: true,
                 message: "Targets set successfully"
@@ -79,6 +83,8 @@ export const glucoseRouter = createTRPCRouter({
                     eq(glucose_target.userId, auth.user.id)
                 )
             )
+
+            await redis.del(`summary:${auth.user.id}:${new Date().getDate()}`)
 
             return {
                 success: true,
@@ -99,6 +105,8 @@ export const glucoseRouter = createTRPCRouter({
                 )
             )
 
+            await redis.del(`summary:${auth.user.id}:${new Date().getDate()}`)
+
             return {
                 success: true,
                 message: "Target updated successfully"
@@ -109,6 +117,12 @@ export const glucoseRouter = createTRPCRouter({
     }),
     getSummary: protectedProcedure.query(async ({ ctx: { db, auth } }) => {
         try {
+            const cachedSummary = await redis.get(`summary:${auth.user.id}:${new Date().getDate()}`) as string
+
+            if (cachedSummary) {
+                return cachedSummary
+            }
+
             const { success } = await ratelimit.limit(auth.user.id)
 
             if (!success) {
@@ -138,6 +152,8 @@ export const glucoseRouter = createTRPCRouter({
                 ],
             })
 
+            await redis.set(`summary:${auth.user.id}:${new Date().getDate()}`, response.text)
+
             return response.text
 
         } catch (error) {
@@ -146,11 +162,18 @@ export const glucoseRouter = createTRPCRouter({
     }),
     getGlucoseAnalysis: protectedProcedure.query(async ({ ctx: { db, auth } }) => {
         try {
+            const cachedAnalysis = await redis.get(`glucose_analysis:${auth.user.id}:${new Date().getDate()}`) as string
+
+            if (cachedAnalysis) {
+                return cachedAnalysis
+            }
+
             const { success } = await ratelimit.limit(auth.user.id)
 
             if (!success) {
                 throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "Too many requests" })
             }
+
 
             const glucoseLogs = await db.select({
                 glucose: glucoseLog.glucose,
@@ -166,6 +189,8 @@ export const glucoseRouter = createTRPCRouter({
                     }]
                 }],
             })
+
+            await redis.set(`glucose_analysis:${auth.user.id}:${new Date().getDate()}`, response.text)
 
             return response.text
         } catch (error) {

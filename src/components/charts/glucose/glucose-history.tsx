@@ -15,8 +15,6 @@ type GlucoseHistoryChartProps = {
 }
 
 export const GlucoseHistoryChart = ({ glucoseLogs, chartConfig, glucoseTarget, className }: GlucoseHistoryChartProps) => {
-    console.log("glucoseTarget", glucoseTarget && glucoseTarget.lowThreshold)
-
     return (
         <Card className={cn(className)}>
             <CardHeader>
