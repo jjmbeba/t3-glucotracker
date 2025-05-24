@@ -3,10 +3,12 @@
 import { useQueryClient } from "@tanstack/react-query"
 import { type ColumnDef } from "@tanstack/react-table"
 import { getQueryKey } from "@trpc/react-query"
+import dayjs from "dayjs"
 import { ArrowUpDown, Loader2, MoreHorizontal } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { toast } from "sonner"
+import GlucoseForm from "~/components/logs/forms/glucose"
 import {
     AlertDialog,
     AlertDialogAction,
@@ -20,7 +22,7 @@ import {
 } from "~/components/ui/alert-dialog"
 import { Button, buttonVariants } from "~/components/ui/button"
 import { Checkbox } from "~/components/ui/checkbox"
-import { Dialog, DialogTitle, DialogHeader, DialogContent, DialogTrigger } from "~/components/ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "~/components/ui/dialog"
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -30,9 +32,7 @@ import {
     DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu"
 import { cn } from "~/lib/utils"
-import { api, type GetGlucoseLogsOutput, type GetGlucoseTargetsOutput } from "~/trpc/react"
-import GlucoseTargetForm from "../forms/glucose"
-import dayjs from "dayjs"
+import { api, type GetGlucoseLogsOutput } from "~/trpc/react"
 
 
 export const glucoseLogsColumns: ColumnDef<GetGlucoseLogsOutput[number]>[] = [
@@ -165,14 +165,15 @@ export const glucoseLogsColumns: ColumnDef<GetGlucoseLogsOutput[number]>[] = [
                         </DropdownMenu>
                         <DialogContent>
                             <DialogHeader>
-                                <DialogTitle>Update target</DialogTitle>
+                                <DialogTitle>Update log</DialogTitle>
                             </DialogHeader>
-                            {/* <GlucoseTargetForm defaultValues={
-                                {
-                                    ...target,
-                                    units: target.units as 'mg/dL' | 'mmol/L'
-                                }
-                            } type="update" id={target.id} /> */}
+                            <GlucoseForm type="update" id={target.id} defaultValues={{
+                                ...target,
+                                units: target.units as 'imperial' | 'metric',
+                                date: target.date.toISOString(),
+                                type: target.type as 'before-meal' | 'after-meal' | 'bedtime' | 'fasting' | 'random',
+                                notes: target.notes ?? '',
+                            }} />
                         </DialogContent>
                     </Dialog>
                 </div>

@@ -7,6 +7,7 @@ import dayjs from 'dayjs'
 import { CalendarIcon, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import type { z } from 'zod'
 import { Button } from '~/components/ui/button'
 import { Calendar } from '~/components/ui/calendar'
 import { Input } from '~/components/ui/input'
@@ -26,7 +27,19 @@ import { capitalize, cn } from '~/lib/utils'
 import { glucoseFormSchema } from '~/schemas/logs'
 import { api } from '~/trpc/react'
 
-const GlucoseForm = () => {
+type GlucoseCreateProps = {
+    type: 'create'
+}
+
+type GlucoseUpdateProps = {
+    type: 'update',
+    id: number,
+    defaultValues: z.infer<typeof glucoseFormSchema>
+}
+
+type Props = GlucoseCreateProps | GlucoseUpdateProps
+
+const GlucoseForm = ({ type, ...props }: Props) => {
     const router = useRouter()
     const queryKey = getQueryKey(api.glucose.getLogs, undefined, 'query')
     const queryClient = useQueryClient()
@@ -49,8 +62,25 @@ const GlucoseForm = () => {
         }
     })
 
+    const { mutate: updateGlucoseLog, isPending: isUpdateGlucoseLogPending } = api.glucose.update.useMutation({
+        onSuccess: () => {
+            form.reset()
+            toast.success("Glucose log updated successfully")
+            router.refresh()
+        },
+        onError: (error) => {
+            toast.error(error.message)
+            console.error(error)
+        },
+        onSettled: () => {
+            queryClient.invalidateQueries({
+                queryKey
+            })
+        }
+    })
+
     const form = useForm({
-        defaultValues: {
+        defaultValues: type === 'update' && 'defaultValues' in props ? glucoseFormSchema.parse(props.defaultValues) : {
             glucose: 0,
             type: 'before-meal',
             date: new Date().toISOString(),
@@ -61,11 +91,20 @@ const GlucoseForm = () => {
             onChange: glucoseFormSchema
         },
         onSubmit: ({ value }) => {
-            createGlucoseLog({
-                ...value,
-                type: value.type as "before-meal" | "after-meal" | "bedtime" | "fasting" | "random",
-                units: value.units as "imperial" | "metric",
-            })
+            if (type === 'create') {
+                createGlucoseLog({
+                    ...value,
+                    type: value.type as "before-meal" | "after-meal" | "bedtime" | "fasting" | "random",
+                    units: value.units as "imperial" | "metric",
+                })
+            } else {
+                updateGlucoseLog({
+                    ...value,
+                    id: 'id' in props ? props.id : 0,
+                    type: value.type as "before-meal" | "after-meal" | "bedtime" | "fasting" | "random",
+                    units: value.units as "imperial" | "metric",
+                })
+            }
         }
     })
 
@@ -252,8 +291,8 @@ const GlucoseForm = () => {
                         selector={(state) => [state.canSubmit, state.isSubmitting]}
                         children={([canSubmit, isSubmitting]) => (
                             <div className='flex gap-2'>
-                                <Button type='submit' disabled={!canSubmit || isSubmitting || isGlucoseLogPending}>
-                                    {isSubmitting || isGlucoseLogPending ? <Loader2 className='size-4 animate-spin' /> : 'Upload log'}
+                                <Button type='submit' disabled={!canSubmit || isSubmitting || isGlucoseLogPending || isUpdateGlucoseLogPending}>
+                                    {isSubmitting || isGlucoseLogPending || isUpdateGlucoseLogPending ? <Loader2 className='size-4 animate-spin' /> : type === 'create' ? 'Create log' : 'Update log'}
                                 </Button>
                                 <Button type='button' variant={'outline'} onClick={() => {
                                     form.reset()
