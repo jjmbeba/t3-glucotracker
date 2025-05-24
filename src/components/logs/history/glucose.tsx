@@ -1,12 +1,11 @@
 "use client"
 
-import { api, type GetGlucoseLogsOutput, type GetGlucoseTargetsOutput } from '~/trpc/react'
+import { type GetGlucoseLogsOutput, type GetGlucoseTargetsOutput } from '~/trpc/react'
 
 import dayjs from "dayjs"
 import { MessageSquareWarningIcon, PlusIcon } from 'lucide-react'
 import { usePathname, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import { toast } from 'sonner'
 import { GlucoseDistributionChart } from "~/components/charts/glucose/glucose-distribution"
 import { GlucoseHistoryChart } from "~/components/charts/glucose/glucose-history"
 import GlucosePieChart from '~/components/charts/glucose/glucose-pie'
@@ -57,49 +56,41 @@ const GlucoseHistorySkeleton = () => {
     )
 }
 
-const GlucoseHistory = ({ error, analysis, timePeriod, targetId }: { error: string, analysis: string, timePeriod: string, targetId: string }) => {
+type Props = {
+    glucoseLogsData: GetGlucoseLogsOutput
+    error: string
+    analysis: string
+    timePeriod: string
+    targetId: string
+    glucoseTargetsData: GetGlucoseTargetsOutput
+}
+
+const GlucoseHistory = ({ glucoseLogsData, glucoseTargetsData, error, analysis, timePeriod, targetId }: Props) => {
     const pathname = usePathname()
     const router = useRouter()
-    
-    const { data: glucoseTargets, isLoading: isGlucoseTargetsLoading, error: glucoseTargetsError } = api.glucose.getTargets.useQuery()
-    const { data, isLoading: isGlucoseLogsLoading, error: glucoseLogsError } = api.glucose.getLogs.useQuery()
 
-    const [glucoseLogs, setGlucoseLogs] = useState<GetGlucoseLogsOutput>([])
+    const [glucoseLogs, setGlucoseLogs] = useState<GetGlucoseLogsOutput>(glucoseLogsData)
     const [selectedTarget, setSelectedTarget] = useState<GetGlucoseTargetsOutput[number] | null>(null)
 
     useEffect(() => {
-        if (!data) return
+        if (!glucoseLogsData) return
 
         if (timePeriod === "lastWeek") {
-            setGlucoseLogs(data.filter((log) => dayjs(log.date).isSame(dayjs(), "week")))
+            setGlucoseLogs(glucoseLogsData.filter((log) => dayjs(log.date).isSame(dayjs(), "week")))
         } else if (timePeriod === "lastMonth") {
-            setGlucoseLogs(data.filter((log) => dayjs(log.date).isSame(dayjs(), "month")))
+            setGlucoseLogs(glucoseLogsData.filter((log) => dayjs(log.date).isSame(dayjs(), "month")))
         } else {
-            setGlucoseLogs(data)
+            setGlucoseLogs(glucoseLogsData)
         }
-    }, [timePeriod, data])
+    }, [timePeriod, glucoseLogsData])
 
     useEffect(() => {
-        if (!glucoseTargets) return
+        if (!glucoseTargetsData) return
 
-        setSelectedTarget(glucoseTargets.find((target) => target.id.toString() === targetId) ?? null)
-    }, [glucoseTargets, targetId])
-
-    if (glucoseLogsError) {
-        toast.error("Error fetching glucose logs")
-        console.error(glucoseLogsError)
-    }
-
-    if (glucoseTargetsError) {
-        toast.error("Error fetching glucose targets")
-        console.error(glucoseTargetsError)
-    }
+        setSelectedTarget(glucoseTargetsData.find((target) => target.id.toString() === targetId) ?? null)
+    }, [glucoseTargetsData, targetId])
 
     const timePeriodLabel = timePeriod === "lastWeek" ? "Last week" : timePeriod === "lastMonth" ? "Last month" : null
-
-    if (isGlucoseLogsLoading || isGlucoseTargetsLoading) {
-        return <GlucoseHistorySkeleton />
-    }
 
     if (glucoseLogs.length === 0) {
         return (
@@ -118,8 +109,6 @@ const GlucoseHistory = ({ error, analysis, timePeriod, targetId }: { error: stri
         )
     }
 
-    console.log(error)
-
     return (
         <div className="flex flex-col">
             <div className={cn("flex flex-col sm:flex-row items-start sm:items-center gap-2", {
@@ -129,7 +118,7 @@ const GlucoseHistory = ({ error, analysis, timePeriod, targetId }: { error: stri
                 {timePeriodLabel && <FilterLabels timePeriodLabel={timePeriodLabel} pathname={pathname} />}
                 <div className="flex items-center gap-2">
                     <FilterGlucoseLogs tooltipContent="Filter glucose levels" />
-                    {glucoseTargets && glucoseTargets.length > 0 && <Select defaultValue={targetId === "" ? constructNewUrl(pathname, {}) : constructNewUrl(pathname, { targetId })} onValueChange={(value) => {
+                    {glucoseTargetsData && glucoseTargetsData.length > 0 && <Select defaultValue={targetId === "" ? constructNewUrl(pathname, {}) : constructNewUrl(pathname, { targetId })} onValueChange={(value) => {
                         router.push(value)
                     }}>
                         <SelectTrigger className="w-[180px]">
@@ -139,7 +128,7 @@ const GlucoseHistory = ({ error, analysis, timePeriod, targetId }: { error: stri
                             <SelectItem value={constructNewUrl(pathname, {})}>
                                 None
                             </SelectItem>
-                            {glucoseTargets?.map((target) => (
+                            {glucoseTargetsData?.map((target) => (
                                 <SelectItem key={target.id} value={constructNewUrl(pathname, { targetId: target.id.toString() })}>
                                     {target.targetName}
                                 </SelectItem>

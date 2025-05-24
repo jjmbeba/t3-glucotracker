@@ -5,7 +5,7 @@ import { env } from "~/env";
 import { ai } from "~/gemini";
 import { handleTRPCError } from "~/lib/errors";
 import { ratelimit, redis } from "~/redis";
-import { glucoseFormSchema } from "~/schemas/logs";
+import { glucoseFormSchema, glucoseLogUpdateSchema } from "~/schemas/logs";
 import { glucoseTargetSchema, glucoseTargetUpdateSchema } from "~/schemas/targets";
 import { glucose_target, glucoseLog } from "~/server/db/schema";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
@@ -19,7 +19,7 @@ export const glucoseRouter = createTRPCRouter({
                 userId: auth.user.id,
             })
 
-            await redis.del(`summary:${auth.user.id}:${new Date().getDate()}`,`glucose_analysis:${auth.user.id}:${new Date().getDate()}`)
+            await redis.del(`summary:${auth.user.id}:${new Date().getDate()}`, `glucose_analysis:${auth.user.id}:${new Date().getDate()}`)
 
             return {
                 success: true,
@@ -29,13 +29,54 @@ export const glucoseRouter = createTRPCRouter({
             handleTRPCError(error)
         }
     }),
+    delete: protectedProcedure.input(z.number()).mutation(async ({ ctx: { db, auth }, input }) => {
+        try {
+            await db.delete(glucoseLog).where(
+                and(
+                    eq(glucoseLog.id, input),
+                    eq(glucoseLog.userId, auth.user.id)
+                )
+            )
+
+            await redis.del(`summary:${auth.user.id}:${new Date().getDate()}`)
+            await redis.del(`glucose_analysis:${auth.user.id}:${new Date().getDate()}`)
+
+            return {
+                success: true,
+                message: "Glucose log deleted successfully"
+            }
+        } catch (error) {
+            handleTRPCError(error)
+        }
+    }),
+    update: protectedProcedure.input(glucoseLogUpdateSchema).mutation(async ({ ctx: { db, auth }, input }) => {
+        try {
+            const { id, ...rest } = input
+
+            await db.update(glucoseLog).set({
+                ...rest,
+                date: new Date(rest.date),
+            }).where(
+                and(
+                    eq(glucoseLog.id, id),
+                    eq(glucoseLog.userId, auth.user.id)
+                )
+            )
+
+            await redis.del(`summary:${auth.user.id}:${new Date().getDate()}`)
+            await redis.del(`glucose_analysis:${auth.user.id}:${new Date().getDate()}`)
+
+            return {
+                success: true,
+                message: "Glucose log updated successfully"
+            }
+        } catch (error) {
+            handleTRPCError(error)
+        }
+    }),
     getLogs: protectedProcedure.query(async ({ ctx: { db, auth } }) => {
         try {
-            return await db.select({
-                id: glucoseLog.id,
-                glucose: glucoseLog.glucose,
-                date: glucoseLog.date,
-            }).from(glucoseLog).where(eq(glucoseLog.userId, auth.user.id)).orderBy(glucoseLog.date).limit(100)
+            return await db.select().from(glucoseLog).where(eq(glucoseLog.userId, auth.user.id)).orderBy(glucoseLog.date).limit(100)
         } catch (error) {
             handleTRPCError(error)
         }
@@ -96,11 +137,13 @@ export const glucoseRouter = createTRPCRouter({
     }),
     updateTarget: protectedProcedure.input(glucoseTargetUpdateSchema).mutation(async ({ ctx: { db, auth }, input }) => {
         try {
+            const { id, ...rest } = input
+
             await db.update(glucose_target).set({
-                ...input,
+                ...rest,
             }).where(
                 and(
-                    eq(glucose_target.id, input.id),
+                    eq(glucose_target.id, id),
                     eq(glucose_target.userId, auth.user.id)
                 )
             )
