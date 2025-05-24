@@ -59,9 +59,7 @@ export function DataTable<TData, TValue>({
             rowSelection
         }
     })
-
-    console.log("searchedColumn", searchedColumn)
-
+    
     return (
         <div>
             {searchedColumn && <div className="flex items-center py-4">

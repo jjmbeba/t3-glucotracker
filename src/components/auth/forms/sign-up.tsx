@@ -50,8 +50,6 @@ const SignUpForm = () => {
         },
     })
 
-    console.log(form.state.errors)
-
     return (
         <form onSubmit={(e) => {
             e.preventDefault()

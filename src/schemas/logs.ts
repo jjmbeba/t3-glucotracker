@@ -9,3 +9,7 @@ export const glucoseFormSchema = z.object({
     units: z.enum(['imperial', 'metric']),
     notes: z.string().max(500),
 })
+
+export const glucoseLogUpdateSchema = glucoseFormSchema.extend({
+    id: z.number(),
+})
