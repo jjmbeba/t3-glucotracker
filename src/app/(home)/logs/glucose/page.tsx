@@ -47,7 +47,7 @@ const GlucoseLogsPage = async (props: {
                         <GlucoseHistory glucoseLogsData={glucoseLogs} glucoseTargetsData={glucoseTargets} error={error} analysis={analysis ?? ''} timePeriod={timePeriod as string ?? ''} targetId={targetId as string ?? ''} />
                     </TabsContent>
                     <TabsContent value='upload'>
-                        <GlucoseForm />
+                        <GlucoseForm type='create' />
                     </TabsContent>
                     <TabsContent value='update'>
                         <DataTable columns={glucoseLogsColumns} data={glucoseLogs} searchedColumn="type" searchedColumnLabel="Type" />
